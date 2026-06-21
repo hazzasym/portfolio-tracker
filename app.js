@@ -700,27 +700,63 @@ async function main() {
     document.getElementById("updatedAt").textContent =
       snap.updatedAt ? " Last update: " + new Date(snap.updatedAt).toLocaleString() : "";
 
-    renderCards(rows, snap, portfolio);
-    if (history && history.length) {
-      renderBenchChart(history, portfolio);
-      renderCompositionChart(history);
-    }
-    setupAllocToggle(rows);
-    renderConcentration(rows);
-    renderRiskMetrics(history || []);
-    renderFXAttribution(rows, snap, portfolio);
-    renderTargetChart(rows);
-    renderReturnChart(rows);
-    renderContribChart(rows, totalCost);
-    renderMovers(rows);
-    renderHoldingsTable(rows);
-    renderDividends(rows);
-    renderWatchlist(portfolio, snap);
-    setupLookup(portfolio, snap, rows);
+    renderCards(rows, snap, portfolio); // persistent KPI bar
+
+    const hist = history || [];
+    // Lazy per-tab renderers (charts only render once, when their tab is shown,
+    // so hidden canvases never draw at zero width).
+    const tabRenderers = {
+      overview: () => {
+        if (hist.length) renderBenchChart(hist, portfolio);
+        setupAllocToggle(rows);
+        renderMovers(rows);
+      },
+      performance: () => {
+        if (hist.length) renderCompositionChart(hist);
+        renderTargetChart(rows);
+        renderReturnChart(rows);
+        renderContribChart(rows, totalCost);
+      },
+      risk: () => {
+        renderConcentration(rows);
+        renderRiskMetrics(hist);
+        renderFXAttribution(rows, snap, portfolio);
+      },
+      income: () => renderDividends(rows),
+      holdings: () => {
+        renderHoldingsTable(rows);
+        renderWatchlist(portfolio, snap);
+        setupLookup(portfolio, snap, rows);
+      },
+    };
+    setupTabs(tabRenderers);
   } catch (e) {
     document.getElementById("subline").textContent = "Error loading data: " + e.message;
     console.error(e);
   }
+}
+
+function setupTabs(renderers) {
+  const rendered = new Set();
+  function activate(tab) {
+    document.querySelectorAll("#tabs button").forEach((b) =>
+      b.classList.toggle("active", b.dataset.tab === tab));
+    document.querySelectorAll(".tab-panel").forEach((p) =>
+      p.classList.toggle("active", p.dataset.tab === tab));
+    if (!rendered.has(tab)) {
+      renderers[tab] && renderers[tab]();
+      rendered.add(tab);
+    } else {
+      // already drawn — just make sure charts fit their (now visible) container
+      document.querySelectorAll(`.tab-panel[data-tab="${tab}"] canvas`).forEach((c) => {
+        const ch = Chart.getChart(c);
+        if (ch) ch.resize();
+      });
+    }
+  }
+  document.querySelectorAll("#tabs button").forEach((b) =>
+    b.addEventListener("click", () => activate(b.dataset.tab)));
+  activate("overview");
 }
 
 main();

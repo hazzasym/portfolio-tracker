@@ -16,52 +16,36 @@
   <main>
     <div class="cards" id="cards"></div>
 
-    <div class="section">
-      <div class="grid-2">
-        <div class="panel">
-          <h3>Portfolio vs Benchmarks <span class="muted">(rebased to 100 on 12 Jun; Policy = target-weighted blend)</span></h3>
-          <div class="chart-wrap"><canvas id="benchChart"></canvas></div>
-        </div>
-        <div class="panel">
-          <div class="panel-head">
-            <h3>Allocation</h3>
-            <div class="toggle" id="allocToggle">
-              <button class="active" data-mode="holding">Holding</button>
-              <button data-mode="class">Class</button>
-              <button data-mode="theme">Theme</button>
-            </div>
+    <nav class="tabs" id="tabs">
+      <button class="active" data-tab="overview">Overview</button>
+      <button data-tab="performance">Performance</button>
+      <button data-tab="risk">Risk &amp; FX</button>
+      <button data-tab="income">Income</button>
+      <button data-tab="holdings">Holdings</button>
+    </nav>
+
+    <!-- OVERVIEW -->
+    <div class="tab-panel active" data-tab="overview">
+      <div class="section">
+        <div class="grid-2">
+          <div class="panel">
+            <h3>Portfolio vs Benchmarks <span class="muted">(rebased to 100 on 12 Jun; Policy = target-weighted blend)</span></h3>
+            <div class="chart-wrap"><canvas id="benchChart"></canvas></div>
           </div>
-          <div class="chart-wrap"><canvas id="allocChart"></canvas></div>
+          <div class="panel">
+            <div class="panel-head">
+              <h3>Allocation</h3>
+              <div class="toggle" id="allocToggle">
+                <button class="active" data-mode="holding">Holding</button>
+                <button data-mode="class">Class</button>
+                <button data-mode="theme">Theme</button>
+              </div>
+            </div>
+            <div class="chart-wrap"><canvas id="allocChart"></canvas></div>
+          </div>
         </div>
       </div>
-    </div>
-
-    <div class="section">
-      <div class="panel">
-        <h3>Composition Over Time (by asset class, THB)</h3>
-        <div class="chart-wrap"><canvas id="compositionChart"></canvas></div>
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="grid-2">
-        <div class="panel">
-          <h3>Current vs Target Allocation</h3>
-          <div class="chart-wrap"><canvas id="targetChart"></canvas></div>
-        </div>
-        <div class="panel">
-          <h3>Return by Holding (%)</h3>
-          <div class="chart-wrap"><canvas id="returnChart"></canvas></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="grid-2">
-        <div class="panel">
-          <h3>Contribution to Total Return <span class="muted">(% of cost basis)</span></h3>
-          <div class="chart-wrap"><canvas id="contribChart"></canvas></div>
-        </div>
+      <div class="section">
         <div class="panel">
           <h3>Movers Today</h3>
           <div id="movers"></div>
@@ -69,89 +53,124 @@
       </div>
     </div>
 
-    <div class="section">
-      <h2>Risk &amp; Concentration</h2>
-      <div class="cards" id="riskCards"></div>
-      <div class="cards" id="riskMetrics"></div>
-      <p class="muted" id="riskNote" style="margin:0 0 16px;font-size:0.8rem"></p>
-      <div class="panel">
-        <h3>Exposure by Theme / Sector</h3>
-        <div class="chart-wrap"><canvas id="themeChart"></canvas></div>
-      </div>
-    </div>
-
-    <div class="section">
-      <h2>Currency (FX) Impact <span class="muted">— USD holdings</span></h2>
-      <div class="cards" id="fxCards"></div>
-      <div class="panel">
-        <h3>Return Attribution: Local Price vs Currency <span class="muted">(THB return, %)</span></h3>
-        <div class="chart-wrap"><canvas id="fxChart"></canvas></div>
-      </div>
-    </div>
-
-    <div class="section">
-      <h2>Holdings — Return since 12 June 2026</h2>
-      <div class="panel table-scroll">
-        <table id="holdingsTable">
-          <thead>
-            <tr>
-              <th>Ticker</th><th>Name</th><th>Class</th><th>Units</th>
-              <th>Buy Price</th><th>Now Price</th><th>Cost (THB)</th>
-              <th>Value (THB)</th><th>Weight</th><th>Return</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </div>
-
-    <div class="section">
-      <h2>Dividend Income <span class="muted">(based on actual last-12-month payouts)</span></h2>
-      <div class="grid-2">
+    <!-- PERFORMANCE -->
+    <div class="tab-panel" data-tab="performance">
+      <div class="section">
         <div class="panel">
-          <h3>Annual Dividend by Holding <span class="muted">(net of tax, THB)</span></h3>
-          <div class="chart-wrap"><canvas id="divChart"></canvas></div>
-        </div>
-        <div class="panel table-scroll">
-          <h3>Your estimate vs actual</h3>
-          <table id="divTable">
-            <thead>
-              <tr><th>Ticker</th><th>Freq</th><th>Est. Yield</th><th>Actual (TTM)</th><th>3-yr Avg</th><th>Net Income (THB)</th></tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-          <p class="muted" id="divNote" style="margin:10px 0 0;font-size:0.8rem"></p>
+          <h3>Composition Over Time (by asset class, THB)</h3>
+          <div class="chart-wrap"><canvas id="compositionChart"></canvas></div>
         </div>
       </div>
-      <div class="panel" style="margin-top:16px;">
-        <h3>Dividend Yield by Year <span class="muted">(annual payout &divide; current price)</span></h3>
-        <div class="chart-wrap"><canvas id="divTrendChart"></canvas></div>
+      <div class="section">
+        <div class="grid-2">
+          <div class="panel">
+            <h3>Current vs Target Allocation</h3>
+            <div class="chart-wrap"><canvas id="targetChart"></canvas></div>
+          </div>
+          <div class="panel">
+            <h3>Return by Holding (%)</h3>
+            <div class="chart-wrap"><canvas id="returnChart"></canvas></div>
+          </div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="panel">
+          <h3>Contribution to Total Return <span class="muted">(% of cost basis)</span></h3>
+          <div class="chart-wrap"><canvas id="contribChart"></canvas></div>
+        </div>
       </div>
     </div>
 
-    <div class="section">
-      <h2>Stock Lookup &amp; Watchlist</h2>
-      <div class="panel">
-        <p class="muted" style="margin-top:0">
-          Search a ticker in your portfolio or watchlist. To <strong>add a new stock</strong> to track
-          permanently, add it to <code>portfolio.json</code> &rarr; <code>watchlist</code> and commit
-          (the daily job will start fetching its price).
-        </p>
-        <div class="lookup-row">
-          <input type="text" id="lookupInput" placeholder="e.g. NVDA, GOOG, SCB.BK" />
-          <button id="lookupBtn">Look up</button>
+    <!-- RISK & FX -->
+    <div class="tab-panel" data-tab="risk">
+      <div class="section">
+        <h2>Risk &amp; Concentration</h2>
+        <div class="cards" id="riskCards"></div>
+        <div class="cards" id="riskMetrics"></div>
+        <p class="muted" id="riskNote" style="margin:0 0 16px;font-size:0.8rem"></p>
+        <div class="panel">
+          <h3>Exposure by Theme / Sector</h3>
+          <div class="chart-wrap"><canvas id="themeChart"></canvas></div>
         </div>
-        <div id="lookupResult"></div>
       </div>
-      <div class="panel" style="margin-top:16px;">
-        <h3>Watchlist (price since 12 June reference)</h3>
-        <div class="table-scroll">
-          <table id="watchTable">
+      <div class="section">
+        <h2>Currency (FX) Impact <span class="muted">— USD holdings</span></h2>
+        <div class="cards" id="fxCards"></div>
+        <div class="panel">
+          <h3>Return Attribution: Local Price vs Currency <span class="muted">(THB return, %)</span></h3>
+          <div class="chart-wrap"><canvas id="fxChart"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INCOME -->
+    <div class="tab-panel" data-tab="income">
+      <div class="section">
+        <h2>Dividend Income <span class="muted">(based on actual last-12-month payouts)</span></h2>
+        <div class="grid-2">
+          <div class="panel">
+            <h3>Annual Dividend by Holding <span class="muted">(net of tax, THB)</span></h3>
+            <div class="chart-wrap"><canvas id="divChart"></canvas></div>
+          </div>
+          <div class="panel table-scroll">
+            <h3>Your estimate vs actual</h3>
+            <table id="divTable">
+              <thead>
+                <tr><th>Ticker</th><th>Freq</th><th>Est. Yield</th><th>Actual (TTM)</th><th>3-yr Avg</th><th>Net Income (THB)</th></tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+            <p class="muted" id="divNote" style="margin:10px 0 0;font-size:0.8rem"></p>
+          </div>
+        </div>
+        <div class="panel" style="margin-top:16px;">
+          <h3>Dividend Yield by Year <span class="muted">(annual payout &divide; current price)</span></h3>
+          <div class="chart-wrap"><canvas id="divTrendChart"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HOLDINGS -->
+    <div class="tab-panel" data-tab="holdings">
+      <div class="section">
+        <h2>Holdings — Return since 12 June 2026</h2>
+        <div class="panel table-scroll">
+          <table id="holdingsTable">
             <thead>
-              <tr><th>Ticker</th><th>Name</th><th>Theme</th><th>Ref Price (THB)</th><th>Now (THB)</th><th>Change</th></tr>
+              <tr>
+                <th>Ticker</th><th>Name</th><th>Class</th><th>Units</th>
+                <th>Buy Price</th><th>Now Price</th><th>Cost (THB)</th>
+                <th>Value (THB)</th><th>Weight</th><th>Return</th>
+              </tr>
             </thead>
             <tbody></tbody>
           </table>
+        </div>
+      </div>
+      <div class="section">
+        <h2>Stock Lookup &amp; Watchlist</h2>
+        <div class="panel">
+          <p class="muted" style="margin-top:0">
+            Search a ticker in your portfolio or watchlist. To <strong>add a new stock</strong> to track
+            permanently, add it to <code>portfolio.json</code> &rarr; <code>watchlist</code> and commit
+            (the daily job will start fetching its price).
+          </p>
+          <div class="lookup-row">
+            <input type="text" id="lookupInput" placeholder="e.g. NVDA, GOOG, SCB.BK" />
+            <button id="lookupBtn">Look up</button>
+          </div>
+          <div id="lookupResult"></div>
+        </div>
+        <div class="panel" style="margin-top:16px;">
+          <h3>Watchlist (price since 12 June reference)</h3>
+          <div class="table-scroll">
+            <table id="watchTable">
+              <thead>
+                <tr><th>Ticker</th><th>Name</th><th>Theme</th><th>Ref Price (THB)</th><th>Now (THB)</th><th>Change</th></tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
