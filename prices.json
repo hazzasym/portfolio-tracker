@@ -1,14 +1,14 @@
 {
-  "updatedAt": "2026-06-21T07:43:32.621849+00:00",
+  "updatedAt": "2026-06-21T23:49:10.905477+00:00",
   "date": "2026-06-21",
   "usdthb": {
-    "price": 32.82,
+    "price": 32.93,
     "currency": "THB",
-    "previousClose": 32.63,
+    "previousClose": 32.53,
     "ok": true
   },
   "gold": {
-    "price": 4172.9,
+    "price": 4160.4,
     "currency": "USD",
     "previousClose": 4328.0,
     "ok": true,
@@ -480,10 +480,6 @@
       "ttm": 7.525,
       "count": 21,
       "payouts": [
-        [
-          "2024-06-21",
-          1.759
-        ],
         [
           "2024-09-20",
           1.746
