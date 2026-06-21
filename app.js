@@ -57,6 +57,9 @@ function prevTHB(item, snap) {
 
 function computeHoldings(portfolio, snap) {
   const thisYear = new Date().getFullYear();
+  const tax = portfolio.meta.withholdingTax || {};
+  const rate = snap.usdthb && snap.usdthb.price;
+  const inception = portfolio.meta.investmentDate;
   return portfolio.holdings.map((h) => {
     let nowPrice, value, valuedLive = true;
     if (h.market === "CASH") {
@@ -96,7 +99,20 @@ function computeHoldings(portfolio, snap) {
     const estYield = h.divYield || 0;
     // Income uses the actual trailing yield when available, else the estimate.
     const effYield = trailingYield != null ? trailingYield : estYield;
-    const annualIncome = effYield * value;
+    const whtRate = tax[h.market] || 0;
+    const annualIncomeGross = effYield * value;
+    const annualIncomeNet = annualIncomeGross * (1 - whtRate);
+
+    // Dividends actually received since the investment date (per-share payouts
+    // x units, USD payouts converted at current FX), net of withholding tax.
+    let incomeReceivedNet = 0;
+    if (div && div.payouts && (h.market === "US" || h.market === "TH")) {
+      const perShare = div.payouts
+        .filter((p) => p[0] >= inception)
+        .reduce((s, p) => s + p[1], 0);
+      const gross = perShare * h.units * (h.market === "US" && rate ? rate : 1);
+      incomeReceivedNet = gross * (1 - whtRate);
+    }
 
     return {
       ...h,
@@ -111,31 +127,43 @@ function computeHoldings(portfolio, snap) {
       trailingYield,
       avg3yYield,
       divByYearYield,
-      annualIncome,
+      whtRate,
+      annualIncomeGross,
+      annualIncomeNet,
+      annualIncome: annualIncomeNet,
+      incomeReceivedNet,
     };
   });
+}
+
+function daysSince(dateStr) {
+  return Math.max(1, Math.round((Date.now() - new Date(dateStr).getTime()) / 86400000));
 }
 
 function renderCards(rows, snap, portfolio) {
   const totalValue = rows.reduce((s, r) => s + r.value, 0);
   const totalCost = portfolio.meta.baseCapitalTHB;
   const pl = totalValue - totalCost;
-  const ret = pl / totalCost;
+  const priceRet = pl / totalCost;
+  const incomeReceived = rows.reduce((s, r) => s + (r.incomeReceivedNet || 0), 0);
+  const totalRet = (pl + incomeReceived) / totalCost; // total return incl. net income received
   const prevTotal = rows.reduce((s, r) => s + r.prevValue, 0);
   const dayChange = totalValue - prevTotal;
   const dayPct = prevTotal ? dayChange / prevTotal : 0;
-  const annualDiv = rows.reduce((s, r) => s + (r.annualIncome || 0), 0);
-  const portYield = totalValue ? annualDiv / totalValue : 0;
+  const annualDivNet = rows.reduce((s, r) => s + (r.annualIncomeNet || 0), 0);
+  const annualDivGross = rows.reduce((s, r) => s + (r.annualIncomeGross || 0), 0);
+  const portYield = totalValue ? annualDivNet / totalValue : 0;
+  const days = daysSince(portfolio.meta.investmentDate);
 
   const cards = [
     { label: "Current Value", value: fmtTHB(totalValue),
-      delta: `<span class="${cls(ret)}">${sign(pl)}${fmtTHB(pl)} (${fmtPct(ret)})</span> vs cost` },
-    { label: "Total Return (since 12 Jun)", value: `<span class="${cls(ret)}">${fmtPct(ret)}</span>`,
-      delta: `Cost basis ${fmtTHB(totalCost)}` },
+      delta: `<span class="${cls(priceRet)}">${sign(pl)}${fmtTHB(pl)} (${fmtPct(priceRet)})</span> vs cost` },
+    { label: `Total Return (${days}d)`, value: `<span class="${cls(totalRet)}">${fmtPct(totalRet)}</span>`,
+      delta: `Price ${fmtPct(priceRet)} + income ${fmtPct(incomeReceived / totalCost)} <span class="muted">(net)</span>` },
     { label: "Day Change", value: `<span class="${cls(dayChange)}">${sign(dayChange)}${fmtTHB(dayChange)}</span>`,
       delta: `<span class="${cls(dayPct)}">${fmtPct(dayPct)}</span> vs prev close` },
-    { label: "Est. Annual Dividends", value: fmtTHB(annualDiv),
-      delta: `Portfolio yield ${(portYield * 100).toFixed(2)}%` },
+    { label: "Annual Dividends (net of tax)", value: fmtTHB(annualDivNet),
+      delta: `Net yield ${(portYield * 100).toFixed(2)}% · gross ${fmtTHB(annualDivGross)}` },
     { label: "USD / THB", value: snap.usdthb && snap.usdthb.ok ? snap.usdthb.price.toFixed(2) : "—",
       delta: `Buy rate ${portfolio.meta.buyExchangeRateUSDTHB}` },
   ];
@@ -172,17 +200,39 @@ function rebase(values) {
   const baseVal = values.find((v) => v != null);
   return values.map((v) => (v == null || !baseVal ? null : (v / baseVal) * 100));
 }
+function policyWeights(portfolio) {
+  // Map target weights to benchmark sleeves by market.
+  const w = { eq: 0, set: 0, gold: 0, cash: 0 };
+  portfolio.holdings.forEach((h) => {
+    const t = h.targetWeight || 0;
+    if (h.market === "US") w.eq += t;
+    else if (h.market === "TH") w.set += t;
+    else if (h.market === "GOLD") w.gold += t;
+    else if (h.market === "CASH") w.cash += t;
+  });
+  const sum = w.eq + w.set + w.gold + w.cash || 1;
+  return { eq: w.eq / sum, set: w.set / sum, gold: w.gold / sum, cash: w.cash / sum };
+}
+
 function renderBenchChart(history, portfolio) {
   const labels = history.map((p) => p.date);
-
   const port = rebase(history.map((p) => p.totalValueTHB));
   const sp = rebase(history.map((p) => (p.benchmarks ? p.benchmarks.sp500THB : null)));
   const gold = rebase(history.map((p) => (p.benchmarks ? p.benchmarks.goldTHB : null)));
+  const set = rebase(history.map((p) => (p.benchmarks ? p.benchmarks.setTHB : null)));
+
+  // Blended policy benchmark = target-weighted mix of equity/SET/gold/cash(flat).
+  const w = policyWeights(portfolio);
+  const blended = labels.map((_, i) => {
+    if (sp[i] == null || gold[i] == null || set[i] == null) return null;
+    return w.eq * sp[i] + w.set * set[i] + w.gold * gold[i] + w.cash * 100;
+  });
 
   const datasets = [
-    { label: "My Portfolio", data: port, borderColor: "#4dabf7", backgroundColor: "rgba(77,171,247,.12)", fill: true, tension: 0.25 },
-    { label: "S&P 500 (VOO)", data: sp, borderColor: "#e3b341", fill: false, tension: 0.25, borderDash: [6, 4] },
-    { label: "Gold", data: gold, borderColor: "#9775fa", fill: false, tension: 0.25, borderDash: [2, 3] },
+    { label: "My Portfolio", data: port, borderColor: "#4dabf7", backgroundColor: "rgba(77,171,247,.12)", fill: true, tension: 0.25, borderWidth: 2.5 },
+    { label: "Policy Benchmark", data: blended, borderColor: "#ff922b", fill: false, tension: 0.25, borderWidth: 2.5 },
+    { label: "S&P 500 (VOO)", data: sp, borderColor: "#e3b341", fill: false, tension: 0.25, borderDash: [6, 4], borderWidth: 1 },
+    { label: "Gold", data: gold, borderColor: "#9775fa", fill: false, tension: 0.25, borderDash: [2, 3], borderWidth: 1 },
   ];
   new Chart(document.getElementById("benchChart"), {
     type: "line",
@@ -272,6 +322,55 @@ function renderCompositionChart(history) {
       scales: {
         x: { ticks: { color: AXIS, maxTicksLimit: 8 }, grid: { color: GRID } },
         y: { stacked: true, ticks: { color: AXIS, callback: (v) => "฿" + (v / 1e6).toFixed(0) + "M" }, grid: { color: GRID } },
+      },
+    },
+  });
+}
+
+/* ---------- Risk & concentration ---------- */
+function renderConcentration(rows) {
+  const total = rows.reduce((s, r) => s + r.value, 0);
+  const weights = rows.map((r) => r.value / total).sort((a, b) => b - a);
+  const hhi = weights.reduce((s, w) => s + w * w, 0);
+  const effN = 1 / hhi;
+  const top1 = weights[0];
+  const top3 = weights.slice(0, 3).reduce((s, w) => s + w, 0);
+
+  // Theme/sector exposure (group; cash/gold fall back to their class label).
+  const themeMap = {};
+  rows.forEach((r) => {
+    const k = r.theme && r.theme !== "-" ? r.theme : r.class;
+    themeMap[k] = (themeMap[k] || 0) + r.value;
+  });
+  const themes = Object.entries(themeMap).sort((a, b) => b[1] - a[1]);
+  const topTheme = themes[0];
+
+  const equityVal = rows.filter((r) => r.market === "US" || r.market === "TH").reduce((s, r) => s + r.value, 0);
+
+  const cards = [
+    { label: "Largest Position", value: rows.slice().sort((a, b) => b.value - a.value)[0].ticker + " " + (top1 * 100).toFixed(1) + "%",
+      delta: top1 > 0.15 ? '<span class="neg">High single-name risk</span>' : "Within 15% guideline" },
+    { label: "Top-3 Concentration", value: (top3 * 100).toFixed(1) + "%",
+      delta: "of total portfolio value" },
+    { label: "Effective # Holdings", value: effN.toFixed(1),
+      delta: `${rows.length} positions · HHI ${(hhi).toFixed(3)}` },
+    { label: "Largest Theme", value: `${topTheme[0]} ${(topTheme[1] / total * 100).toFixed(0)}%`,
+      delta: `Equity book ${(equityVal / total * 100).toFixed(0)}% of port` },
+  ];
+  document.getElementById("riskCards").innerHTML = cards
+    .map((c) => `<div class="card"><div class="label">${c.label}</div>
+      <div class="value">${c.value}</div><div class="delta">${c.delta}</div></div>`).join("");
+
+  new Chart(document.getElementById("themeChart"), {
+    type: "bar",
+    data: { labels: themes.map((t) => t[0]),
+      datasets: [{ data: themes.map((t) => t[1] / total * 100), backgroundColor: themes.map((_, i) => PALETTE[i % PALETTE.length]) }] },
+    options: {
+      indexAxis: "y", maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => c.parsed.x.toFixed(1) + "% (" + fmtTHB(c.parsed.x / 100 * total) + ")" } } },
+      scales: {
+        x: { ticks: { color: AXIS, callback: (v) => v + "%" }, grid: { color: GRID } },
+        y: { ticks: { color: AXIS }, grid: { display: false } },
       },
     },
   });
@@ -388,9 +487,11 @@ function renderDividends(rows) {
       <td>${pctOrDash(r.avg3yYield)}</td>
       <td>${fmtTHB(r.annualIncome)}</td></tr>`;
   }).join("");
-  document.getElementById("divNote").innerHTML = flagged
-    ? '<strong>*</strong> actual trailing yield differs from your estimate by &gt;0.5pp. Note: Thai stocks can include large special dividends, inflating the trailing figure.'
+  const base = flagged
+    ? '<strong>*</strong> actual trailing yield differs from your estimate by &gt;0.5pp. Thai stocks can include large special dividends, inflating the trailing figure.'
     : "Your estimates match the actual trailing yields closely.";
+  document.getElementById("divNote").innerHTML = base +
+    " Yields shown are gross; <em>Net Income</em> applies withholding tax (US 15%, Thai 10%).";
 
   renderDivTrendChart(dv);
 }
@@ -499,6 +600,7 @@ async function main() {
       renderCompositionChart(history);
     }
     setupAllocToggle(rows);
+    renderConcentration(rows);
     renderTargetChart(rows);
     renderReturnChart(rows);
     renderContribChart(rows, totalCost);

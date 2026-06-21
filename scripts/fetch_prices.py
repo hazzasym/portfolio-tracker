@@ -83,12 +83,15 @@ def fetch_dividends(symbol):
                 by_year[y] = round(by_year.get(y, 0.0) + amt, 6)
             cutoff = datetime.now(timezone.utc).timestamp() - 365 * 24 * 3600
             ttm = round(sum(a for dt, a in rows if dt.timestamp() >= cutoff), 6)
-            return {"byYear": by_year, "ttm": ttm, "count": len(rows), "ok": True}
+            # dated payouts (last ~2y) so the page can sum income received since inception
+            two_yr = datetime.now(timezone.utc).timestamp() - 2 * 365 * 24 * 3600
+            payouts = [[dt.strftime("%Y-%m-%d"), round(a, 6)] for dt, a in rows if dt.timestamp() >= two_yr]
+            return {"byYear": by_year, "ttm": ttm, "count": len(rows), "payouts": payouts, "ok": True}
         except Exception as e:  # noqa: BLE001
             last_err = e
             time.sleep(1.0 * (attempt + 1))
     print(f"  ! failed dividends for {symbol}: {last_err}")
-    return {"byYear": {}, "ttm": 0.0, "count": 0, "ok": False}
+    return {"byYear": {}, "ttm": 0.0, "count": 0, "payouts": [], "ok": False}
 
 
 def load_json(path, default):
@@ -119,6 +122,9 @@ def main():
 
     print("Fetching gold (GC=F) ...")
     gold = fetch_quote("GC=F")
+
+    print("Fetching SET index (^SET.BK) ...")
+    setidx = fetch_quote("^SET.BK")
 
     prices = {}
     for sym in sorted(symbols):
@@ -192,6 +198,7 @@ def main():
     # Benchmark raw price levels (THB) so the page can rebase to the buy date.
     voo = prices.get("VOO", {})
     sp500_thb = voo["price"] * rate if (voo.get("ok") and rate) else None
+    set_thb = setidx["price"] if setidx.get("ok") else None
 
     history = load_json(HISTORY, [])
     today = now.strftime("%Y-%m-%d")
@@ -201,7 +208,7 @@ def main():
         "usdthb": rate,
         "complete": valued,
         "byClass": by_class,
-        "benchmarks": {"sp500THB": sp500_thb, "goldTHB": gold_thb},
+        "benchmarks": {"sp500THB": sp500_thb, "goldTHB": gold_thb, "setTHB": set_thb},
     }
     # Replace today's point if it already exists, else append.
     history = [p for p in history if p.get("date") != today]

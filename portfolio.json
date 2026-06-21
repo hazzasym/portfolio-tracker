@@ -5,6 +5,7 @@
     "baseCapitalTHB": 100000000,
     "buyExchangeRateUSDTHB": 32.9,
     "ozPerBahtWeight": 0.490147,
+    "withholdingTax": { "US": 0.15, "TH": 0.10 },
     "notes": "Edit this file to change the portfolio, then commit it. Buy prices are per-unit in THB as of the investment date. US holdings store the equivalent USD buy price too. Gold (99.99) is tracked via international gold spot (GC=F) converted to THB per baht-weight."
   },
   "holdings": [

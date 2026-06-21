@@ -68,11 +68,13 @@ def main():
     fx = hist_closes("THB=X", period1, period2)
     print("History GC=F ...")
     gold = hist_closes("GC=F", period1, period2)
+    print("History ^SET.BK ...")
+    setidx = hist_closes("^SET.BK", period1, period2)
 
     voo = next((h for h in portfolio["holdings"] if h["ticker"] == "VOO"), None)
     gold_h = next((h for h in portfolio["holdings"] if h["market"] == "GOLD"), None)
 
-    all_dates = set(fx) | set(gold)
+    all_dates = set(fx) | set(gold) | set(setidx)
     for d in series.values():
         all_dates |= set(d)
     # Iterate ALL dates (incl. days just before the investment date) so the
@@ -81,7 +83,7 @@ def main():
     start_str = meta["investmentDate"]
 
     last = {sym: None for sym in series}
-    last_fx = last_gold = None
+    last_fx = last_gold = last_set = None
     points = []
     for d in all_dates:
         for sym, sdict in series.items():
@@ -91,6 +93,8 @@ def main():
             last_fx = fx[d]
         if d in gold:
             last_gold = gold[d]
+        if d in setidx:
+            last_set = setidx[d]
         if d < start_str:
             continue
         # Only emit once every needed series has a value to forward-fill from.
@@ -123,7 +127,8 @@ def main():
             "complete": True,
             "byClass": by_class,
             "benchmarks": {"sp500THB": round(sp500_thb, 4) if sp500_thb else None,
-                           "goldTHB": round(gold_thb, 4)},
+                           "goldTHB": round(gold_thb, 4),
+                           "setTHB": round(last_set, 4) if last_set else None},
         })
 
     # Merge with any existing live points (live wins for matching dates).

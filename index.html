@@ -18,7 +18,7 @@
     <div class="section">
       <div class="grid-2">
         <div class="panel">
-          <h3>Portfolio vs Benchmarks <span class="muted">(rebased to 100 on 12 Jun)</span></h3>
+          <h3>Portfolio vs Benchmarks <span class="muted">(rebased to 100 on 12 Jun; Policy = target-weighted blend)</span></h3>
           <div class="chart-wrap"><canvas id="benchChart"></canvas></div>
         </div>
         <div class="panel">
@@ -69,6 +69,15 @@
     </div>
 
     <div class="section">
+      <h2>Risk &amp; Concentration</h2>
+      <div class="cards" id="riskCards"></div>
+      <div class="panel">
+        <h3>Exposure by Theme / Sector</h3>
+        <div class="chart-wrap"><canvas id="themeChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="section">
       <h2>Holdings — Return since 12 June 2026</h2>
       <div class="panel table-scroll">
         <table id="holdingsTable">
@@ -88,14 +97,14 @@
       <h2>Dividend Income <span class="muted">(based on actual last-12-month payouts)</span></h2>
       <div class="grid-2">
         <div class="panel">
-          <h3>Annual Dividend by Holding (THB)</h3>
+          <h3>Annual Dividend by Holding <span class="muted">(net of tax, THB)</span></h3>
           <div class="chart-wrap"><canvas id="divChart"></canvas></div>
         </div>
         <div class="panel table-scroll">
           <h3>Your estimate vs actual</h3>
           <table id="divTable">
             <thead>
-              <tr><th>Ticker</th><th>Freq</th><th>Est. Yield</th><th>Actual (TTM)</th><th>3-yr Avg</th><th>Income (THB)</th></tr>
+              <tr><th>Ticker</th><th>Freq</th><th>Est. Yield</th><th>Actual (TTM)</th><th>3-yr Avg</th><th>Net Income (THB)</th></tr>
             </thead>
             <tbody></tbody>
           </table>
