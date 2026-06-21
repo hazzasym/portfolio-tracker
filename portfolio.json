@@ -1,0 +1,31 @@
+{
+  "meta": {
+    "name": "My Investment Portfolio",
+    "investmentDate": "2026-06-12",
+    "baseCapitalTHB": 100000000,
+    "buyExchangeRateUSDTHB": 32.9,
+    "ozPerBahtWeight": 0.490147,
+    "notes": "Edit this file to change the portfolio, then commit it. Buy prices are per-unit in THB as of the investment date. US holdings store the equivalent USD buy price too. Gold (99.99) is tracked via international gold spot (GC=F) converted to THB per baht-weight."
+  },
+  "holdings": [
+    { "ticker": "NVDA",  "symbol": "NVDA",      "name": "NVIDIA",                 "class": "US Stock", "market": "US",   "targetWeight": 0.20, "units": 2962.6333425718121, "buyPriceTHB": 6750.751,  "buyValueTHB": 20000000, "divYield": 0.0014, "divFreq": "3M",            "theme": "Tech",         "reason": "7 นางฟ้า" },
+    { "ticker": "TSM",   "symbol": "TSM",       "name": "Taiwan Semiconductor",   "class": "US Stock", "market": "US",   "targetWeight": 0.10, "units": 716.9848035787866,  "buyPriceTHB": 13947.297, "buyValueTHB": 10000000, "divYield": 0.0083, "divFreq": "3M",            "theme": "Tech",         "reason": "คอขวด AI" },
+    { "ticker": "BE",    "symbol": "BE",        "name": "Bloom Energy",           "class": "US Stock", "market": "US",   "targetWeight": 0.10, "units": 1168.0553676933171, "buyPriceTHB": 8561.238,  "buyValueTHB": 10000000, "divYield": 0.0,    "divFreq": "not-available", "theme": "Energy",       "reason": "ผลิตพลังงาน" },
+    { "ticker": "LLY",   "symbol": "LLY",       "name": "Eli Lilly",              "class": "US Stock", "market": "US",   "targetWeight": 0.05, "units": 134.13564332795897, "buyPriceTHB": 37275.7,   "buyValueTHB": 5000000,  "divYield": 0.0056, "divFreq": "3M",            "theme": "Pharma",       "reason": "Growth" },
+    { "ticker": "JNJ",   "symbol": "JNJ",       "name": "Johnson & Johnson",      "class": "US Stock", "market": "US",   "targetWeight": 0.05, "units": 630.9448411615291,  "buyPriceTHB": 7924.623,  "buyValueTHB": 5000000,  "divYield": 0.022,  "divFreq": "3M",            "theme": "Pharma",       "reason": "Defensive stock" },
+    { "ticker": "VOO",   "symbol": "VOO",       "name": "Vanguard S&P 500 ETF",   "class": "US Fund",  "market": "US",   "targetWeight": 0.15, "units": 668.5637534595389,  "buyPriceTHB": 22436.155, "buyValueTHB": 15000000, "divYield": 0.0105, "divFreq": "3M",            "theme": "ETF (S&P500)", "reason": "VOO เสี่ยงต่ำกว่า SPY เนื่องจากลงกระจายกว่า" },
+    { "ticker": "ADVANC","symbol": "ADVANC.BK", "name": "Advanced Info Service",  "class": "Thai Stock","market": "TH",  "targetWeight": 0.05, "units": 13661.20218579235,  "buyPriceTHB": 366,       "buyValueTHB": 5000000,  "divYield": 0.0953, "divFreq": "",              "theme": "Telecom",      "reason": "" },
+    { "ticker": "SCB",   "symbol": "SCB.BK",    "name": "SCB X",                  "class": "Thai Stock","market": "TH",  "targetWeight": 0.05, "units": 35714.285714285717, "buyPriceTHB": 140,       "buyValueTHB": 5000000,  "divYield": 0.0806, "divFreq": "6M",            "theme": "Finance",      "reason": "" },
+    { "ticker": "GOLD",  "symbol": "GC=F",      "name": "Gold (99.99)",           "class": "Gold",     "market": "GOLD", "targetWeight": 0.15, "units": 221.10849056603774, "buyPriceTHB": 67840,     "buyValueTHB": 15000000, "divYield": null,   "divFreq": "-",             "theme": "-",            "reason": "Hedge / store of value" },
+    { "ticker": "CASH",  "symbol": "CASH",      "name": "Cash",                   "class": "Cash",     "market": "CASH", "targetWeight": 0.10, "units": 1,                  "buyPriceTHB": 10000000,  "buyValueTHB": 10000000, "divYield": null,   "divFreq": "-",             "theme": "-",            "reason": "Liquidity" }
+  ],
+  "watchlist": [
+    { "ticker": "SPCX", "symbol": "SPCX", "name": "SPCX",           "market": "US", "refPriceTHB": 5295.255,  "theme": "Tech",         "reason": "หุ้นซิ่ง" },
+    { "ticker": "GOOG", "symbol": "GOOG", "name": "Alphabet",       "market": "US", "refPriceTHB": 12671.764, "theme": "Tech",         "reason": "7 นางฟ้า" },
+    { "ticker": "PLTR", "symbol": "PLTR", "name": "Palantir",       "market": "US", "refPriceTHB": 4210.871,  "theme": "Tech",         "reason": "" },
+    { "ticker": "CRWV", "symbol": "CRWV", "name": "CoreWeave",      "market": "US", "refPriceTHB": 3308.095,  "theme": "Tech",         "reason": "" },
+    { "ticker": "GEV",  "symbol": "GEV",  "name": "GE Vernova",     "market": "US", "refPriceTHB": 30947.714, "theme": "Energy",       "reason": "คอขวด AI" },
+    { "ticker": "SPY",  "symbol": "SPY",  "name": "SPDR S&P 500",   "market": "US", "refPriceTHB": 24403.575, "theme": "ETF (S&P500)", "reason": "" },
+    { "ticker": "RSP",  "symbol": "RSP",  "name": "Invesco S&P 500 Equal Weight", "market": "US", "refPriceTHB": 6963.285, "theme": "ETF", "reason": "" }
+  ]
+}
