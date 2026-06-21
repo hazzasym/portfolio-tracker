@@ -56,6 +56,7 @@ function prevTHB(item, snap) {
 }
 
 function computeHoldings(portfolio, snap) {
+  const thisYear = new Date().getFullYear();
   return portfolio.holdings.map((h) => {
     let nowPrice, value, valuedLive = true;
     if (h.market === "CASH") {
@@ -74,6 +75,29 @@ function computeHoldings(portfolio, snap) {
     }
     const prevP = prevTHB(h, snap);
     const prevValue = prevP != null ? prevP * h.units : value;
+
+    // --- dividend analytics (actual payouts from Yahoo) ---
+    const nativeQ = snap.prices && snap.prices[h.symbol];
+    const nativePrice = nativeQ && nativeQ.ok ? nativeQ.price : null;
+    const div = (snap.dividends && snap.dividends[h.symbol]) || null;
+    let trailingYield = null, avg3yYield = null, divByYearYield = null;
+    if (div && nativePrice) {
+      trailingYield = div.ttm / nativePrice;
+      const complete = Object.keys(div.byYear)
+        .filter((y) => Number(y) < thisYear).sort();
+      const last3 = complete.slice(-3);
+      if (last3.length) {
+        const avgPerShare = last3.reduce((s, y) => s + div.byYear[y], 0) / last3.length;
+        avg3yYield = avgPerShare / nativePrice;
+      }
+      divByYearYield = {};
+      last3.forEach((y) => { divByYearYield[y] = div.byYear[y] / nativePrice; });
+    }
+    const estYield = h.divYield || 0;
+    // Income uses the actual trailing yield when available, else the estimate.
+    const effYield = trailingYield != null ? trailingYield : estYield;
+    const annualIncome = effYield * value;
+
     return {
       ...h,
       nowPrice,
@@ -83,6 +107,11 @@ function computeHoldings(portfolio, snap) {
       ret: (value - h.buyValueTHB) / h.buyValueTHB,
       dayChange: prevValue ? value / prevValue - 1 : 0,
       valuedLive,
+      estYield,
+      trailingYield,
+      avg3yYield,
+      divByYearYield,
+      annualIncome,
     };
   });
 }
@@ -95,7 +124,7 @@ function renderCards(rows, snap, portfolio) {
   const prevTotal = rows.reduce((s, r) => s + r.prevValue, 0);
   const dayChange = totalValue - prevTotal;
   const dayPct = prevTotal ? dayChange / prevTotal : 0;
-  const annualDiv = rows.reduce((s, r) => s + (r.divYield ? r.divYield * r.value : 0), 0);
+  const annualDiv = rows.reduce((s, r) => s + (r.annualIncome || 0), 0);
   const portYield = totalValue ? annualDiv / totalValue : 0;
 
   const cards = [
@@ -326,15 +355,19 @@ function renderMovers(rows) {
   document.getElementById("movers").innerHTML = card("Top gainer today", top) + card("Top loser today", bottom);
 }
 
-/* ---------- #2 Dividend income ---------- */
+/* ---------- #2 Dividend income (actual payouts vs estimate) ---------- */
 const FREQ = { "3M": "Quarterly", "6M": "Semi-annual", "12M": "Annual", "": "—", "-": "—", "not-available": "—" };
+const pctOrDash = (n) => (n == null ? '<span class="muted">—</span>' : (n * 100).toFixed(2) + "%");
+
 function renderDividends(rows) {
-  const dv = rows.filter((r) => r.divYield).map((r) => ({ ...r, annual: r.divYield * r.value }))
-    .sort((a, b) => b.annual - a.annual);
+  // Anything that pays (actual or estimated) is a dividend holding.
+  const dv = rows.filter((r) => (r.trailingYield && r.trailingYield > 0) || r.estYield > 0)
+    .sort((a, b) => b.annualIncome - a.annualIncome);
+
   new Chart(document.getElementById("divChart"), {
     type: "bar",
     data: { labels: dv.map((r) => r.ticker),
-      datasets: [{ data: dv.map((r) => r.annual), backgroundColor: dv.map((_, i) => PALETTE[i % PALETTE.length]) }] },
+      datasets: [{ data: dv.map((r) => r.annualIncome), backgroundColor: dv.map((_, i) => PALETTE[i % PALETTE.length]) }] },
     options: {
       maintainAspectRatio: false,
       plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => fmtTHB(c.parsed.y) } } },
@@ -344,11 +377,52 @@ function renderDividends(rows) {
       },
     },
   });
-  document.querySelector("#divTable tbody").innerHTML = dv.map((r) => `<tr>
+
+  let flagged = false;
+  document.querySelector("#divTable tbody").innerHTML = dv.map((r) => {
+    const diverges = r.trailingYield != null && Math.abs(r.trailingYield - r.estYield) > 0.005;
+    if (diverges) flagged = true;
+    const actualCell = r.trailingYield == null
+      ? '<span class="muted">n/a</span>'
+      : `<span class="${diverges ? (r.trailingYield > r.estYield ? "pos" : "neg") : ""}">${(r.trailingYield * 100).toFixed(2)}%${diverges ? " *" : ""}</span>`;
+    return `<tr>
       <td class="ticker">${r.ticker}</td>
-      <td>${(r.divYield * 100).toFixed(2)}%</td>
       <td>${FREQ[r.divFreq] || r.divFreq || "—"}</td>
-      <td>${fmtTHB(r.annual)}</td></tr>`).join("");
+      <td>${pctOrDash(r.estYield || null)}</td>
+      <td>${actualCell}</td>
+      <td>${pctOrDash(r.avg3yYield)}</td>
+      <td>${fmtTHB(r.annualIncome)}</td></tr>`;
+  }).join("");
+  document.getElementById("divNote").innerHTML = flagged
+    ? '<strong>*</strong> actual trailing yield differs from your estimate by &gt;0.5pp. Note: Thai stocks can include large special dividends, inflating the trailing figure.'
+    : "Your estimates match the actual trailing yields closely.";
+
+  renderDivTrendChart(dv);
+}
+
+function renderDivTrendChart(dv) {
+  const payers = dv.filter((r) => r.divByYearYield && Object.keys(r.divByYearYield).length);
+  const years = [];
+  payers.forEach((r) => Object.keys(r.divByYearYield).forEach((y) => { if (!years.includes(y)) years.push(y); }));
+  years.sort();
+  const datasets = years.map((y, i) => ({
+    label: y,
+    data: payers.map((r) => (r.divByYearYield[y] != null ? r.divByYearYield[y] * 100 : 0)),
+    backgroundColor: PALETTE[i % PALETTE.length],
+  }));
+  new Chart(document.getElementById("divTrendChart"), {
+    type: "bar",
+    data: { labels: payers.map((r) => r.ticker), datasets },
+    options: {
+      maintainAspectRatio: false,
+      plugins: { legend: { labels: { color: "#e6edf3", boxWidth: 12 } },
+        tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.parsed.y.toFixed(2)}%` } } },
+      scales: {
+        x: { ticks: { color: AXIS }, grid: { display: false } },
+        y: { ticks: { color: AXIS, callback: (v) => v + "%" }, grid: { color: GRID } },
+      },
+    },
+  });
 }
 
 /* ---------- watchlist + lookup ---------- */

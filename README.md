@@ -10,7 +10,7 @@ Initial investment: **12 June 2026**, cost basis **฿100,000,000**.
 
 - **Current portfolio value** and total return vs the 12 June investment date
 - **Day change** vs previous close, and live USD/THB rate
-- **Estimated annual dividend income** + portfolio yield
+- **Dividend income from actual payouts** — pulls each holding's real dividends (last ~5 yrs), shows trailing-12-month yield, **3-year average**, and your estimate side by side, plus a yield-by-year trend chart
 - **Portfolio vs benchmarks** — your value rebased to 100 on 12 Jun vs S&P 500 (VOO) and gold
 - **Composition over time** — stacked area of asset-class mix
 - **Allocation** doughnut with a toggle: by holding / asset class / theme

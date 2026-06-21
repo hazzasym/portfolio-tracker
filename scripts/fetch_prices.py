@@ -55,6 +55,42 @@ def fetch_quote(symbol):
             "error": str(last_err)}
 
 
+def fetch_dividends(symbol):
+    """Return {'byYear': {year: total/share}, 'ttm': trailing-12-month/share}.
+
+    Pulls ~5 years of dividend events from Yahoo so we can show the real
+    payout trend and trailing yield, not just a manual estimate.
+    """
+    url = (
+        "https://query1.finance.yahoo.com/v8/finance/chart/"
+        f"{urllib.parse.quote(symbol)}?interval=1wk&range=5y&events=div"
+    )
+    last_err = None
+    for attempt in range(3):
+        try:
+            req = urllib.request.Request(url, headers=HEADERS)
+            with urllib.request.urlopen(req, timeout=20) as resp:
+                data = json.load(resp)
+            result = data["chart"]["result"][0]
+            events = (result.get("events") or {}).get("dividends") or {}
+            rows = sorted(
+                (datetime.fromtimestamp(v["date"], timezone.utc), float(v["amount"]))
+                for v in events.values()
+            )
+            by_year = {}
+            for dt, amt in rows:
+                y = str(dt.year)
+                by_year[y] = round(by_year.get(y, 0.0) + amt, 6)
+            cutoff = datetime.now(timezone.utc).timestamp() - 365 * 24 * 3600
+            ttm = round(sum(a for dt, a in rows if dt.timestamp() >= cutoff), 6)
+            return {"byYear": by_year, "ttm": ttm, "count": len(rows), "ok": True}
+        except Exception as e:  # noqa: BLE001
+            last_err = e
+            time.sleep(1.0 * (attempt + 1))
+    print(f"  ! failed dividends for {symbol}: {last_err}")
+    return {"byYear": {}, "ttm": 0.0, "count": 0, "ok": False}
+
+
 def load_json(path, default):
     if os.path.exists(path):
         with open(path, "r", encoding="utf-8") as f:
@@ -89,6 +125,13 @@ def main():
         print(f"Fetching {sym} ...")
         prices[sym] = fetch_quote(sym)
 
+    # Dividend history (per-share) for equities/funds so the page can show the
+    # real trailing yield and multi-year trend vs the manual estimate.
+    dividends = {}
+    for sym in sorted(symbols):
+        print(f"Fetching dividends {sym} ...")
+        dividends[sym] = fetch_dividends(sym)
+
     now = datetime.now(timezone.utc)
     snapshot = {
         "updatedAt": now.isoformat(),
@@ -96,6 +139,7 @@ def main():
         "usdthb": usdthb,
         "gold": {**gold, "ozPerBahtWeight": oz_per_baht},
         "prices": prices,
+        "dividends": dividends,
     }
 
     with open(PRICES, "w", encoding="utf-8") as f:

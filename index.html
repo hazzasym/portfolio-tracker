@@ -85,21 +85,26 @@
     </div>
 
     <div class="section">
-      <h2>Dividend Income (estimated)</h2>
+      <h2>Dividend Income <span class="muted">(based on actual last-12-month payouts)</span></h2>
       <div class="grid-2">
         <div class="panel">
           <h3>Annual Dividend by Holding (THB)</h3>
           <div class="chart-wrap"><canvas id="divChart"></canvas></div>
         </div>
         <div class="panel table-scroll">
-          <h3>Details</h3>
+          <h3>Your estimate vs actual</h3>
           <table id="divTable">
             <thead>
-              <tr><th>Ticker</th><th>Yield</th><th>Frequency</th><th>Annual Income (THB)</th></tr>
+              <tr><th>Ticker</th><th>Freq</th><th>Est. Yield</th><th>Actual (TTM)</th><th>3-yr Avg</th><th>Income (THB)</th></tr>
             </thead>
             <tbody></tbody>
           </table>
+          <p class="muted" id="divNote" style="margin:10px 0 0;font-size:0.8rem"></p>
         </div>
+      </div>
+      <div class="panel" style="margin-top:16px;">
+        <h3>Dividend Yield by Year <span class="muted">(annual payout &divide; current price)</span></h3>
+        <div class="chart-wrap"><canvas id="divTrendChart"></canvas></div>
       </div>
     </div>
 
