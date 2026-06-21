@@ -16,6 +16,27 @@ const PALETTE = [
 ];
 const AXIS = "#8b98a5", GRID = "#2c3845";
 
+// Stable, consistent colors across every chart.
+const CLASS_COLORS = {
+  "US Stock": "#4dabf7", "US Fund": "#22b8cf", "Thai Stock": "#2fbf71",
+  "Gold": "#e3b341", "Cash": "#8b98a5",
+};
+const COLOR = { ticker: {}, class: {}, theme: {} };
+function buildColors(portfolio) {
+  Object.assign(COLOR.class, CLASS_COLORS);
+  portfolio.holdings.forEach((h, i) => { COLOR.ticker[h.ticker] = PALETTE[i % PALETTE.length]; });
+  (portfolio.watchlist || []).forEach((w, i) => {
+    if (!COLOR.ticker[w.ticker]) COLOR.ticker[w.ticker] = PALETTE[(i + 5) % PALETTE.length];
+  });
+  const themes = [];
+  portfolio.holdings.forEach((h) => {
+    const t = h.theme && h.theme !== "-" ? h.theme : h.class;
+    if (!themes.includes(t)) themes.push(t);
+  });
+  themes.forEach((t, i) => { COLOR.theme[t] = COLOR.class[t] || PALETTE[i % PALETTE.length]; });
+}
+function colorFor(kind, label) { return (COLOR[kind] && COLOR[kind][label]) || "#748ffc"; }
+
 let DATA = {};
 let allocChartRef = null;
 
@@ -173,26 +194,59 @@ function renderCards(rows, snap, portfolio) {
     .join("");
 }
 
+const HOLDING_COLS = [
+  { label: "Ticker", key: (r) => r.ticker, type: "str" },
+  { label: "Name", key: (r) => r.name, type: "str" },
+  { label: "Class", key: (r) => r.class, type: "str" },
+  { label: "Units", key: (r) => r.units, type: "num" },
+  { label: "Buy Price", key: (r) => r.buyPriceTHB, type: "num" },
+  { label: "Now Price", key: (r) => r.nowPrice ?? -1, type: "num" },
+  { label: "Cost (THB)", key: (r) => r.cost, type: "num" },
+  { label: "Value (THB)", key: (r) => r.value, type: "num" },
+  { label: "Weight", key: (r) => r.value, type: "num" },
+  { label: "Return", key: (r) => r.ret, type: "num" },
+];
+let holdingSort = { col: 7, dir: -1 }; // default: Value desc
+
 function renderHoldingsTable(rows) {
   const totalValue = rows.reduce((s, r) => s + r.value, 0);
-  document.querySelector("#holdingsTable tbody").innerHTML = rows
-    .slice().sort((a, b) => b.value - a.value)
-    .map((r) => {
-      const weight = totalValue ? r.value / totalValue : 0;
-      const nowP = r.nowPrice == null
-        ? (r.market === "CASH" ? "—" : '<span class="muted">n/a</span>') : fmtTHB2(r.nowPrice);
-      const buyP = r.market === "CASH" ? "—" : fmtTHB2(r.buyPriceTHB);
-      return `<tr>
-        <td class="ticker">${r.ticker}</td>
-        <td>${r.name}</td>
-        <td><span class="tag">${r.class}</span></td>
-        <td>${r.market === "CASH" ? "—" : Number(r.units).toLocaleString("en-US", { maximumFractionDigits: 2 })}</td>
-        <td>${buyP}</td><td>${nowP}</td>
-        <td>${fmtTHB(r.cost)}</td><td>${fmtTHB(r.value)}</td>
-        <td>${(weight * 100).toFixed(1)}%</td>
-        <td class="${cls(r.ret)}">${fmtPct(r.ret)}</td>
-      </tr>`;
-    }).join("");
+  // header with sort handlers
+  const headRow = document.querySelector("#holdingsTable thead tr");
+  headRow.innerHTML = HOLDING_COLS.map((c, i) => {
+    const sorted = i === holdingSort.col;
+    const arrow = sorted ? (holdingSort.dir === -1 ? "▼" : "▲") : "▲";
+    return `<th class="sortable ${sorted ? "sorted" : ""}" data-col="${i}">${c.label}<span class="arrow">${arrow}</span></th>`;
+  }).join("");
+  headRow.querySelectorAll("th").forEach((th) => th.addEventListener("click", () => {
+    const i = +th.dataset.col;
+    if (holdingSort.col === i) holdingSort.dir *= -1;
+    else holdingSort = { col: i, dir: HOLDING_COLS[i].type === "str" ? 1 : -1 };
+    renderHoldingsTable(rows);
+  }));
+
+  const col = HOLDING_COLS[holdingSort.col];
+  const sorted = rows.slice().sort((a, b) => {
+    const va = col.key(a), vb = col.key(b);
+    const cmp = col.type === "str" ? String(va).localeCompare(String(vb)) : va - vb;
+    return cmp * holdingSort.dir;
+  });
+
+  document.querySelector("#holdingsTable tbody").innerHTML = sorted.map((r) => {
+    const weight = totalValue ? r.value / totalValue : 0;
+    const nowP = r.nowPrice == null
+      ? (r.market === "CASH" ? "—" : '<span class="muted">n/a</span>') : fmtTHB2(r.nowPrice);
+    const buyP = r.market === "CASH" ? "—" : fmtTHB2(r.buyPriceTHB);
+    return `<tr>
+      <td class="ticker" data-label="Ticker">${r.ticker}</td>
+      <td data-label="Name">${r.name}</td>
+      <td data-label="Class"><span class="tag">${r.class}</span></td>
+      <td data-label="Units">${r.market === "CASH" ? "—" : Number(r.units).toLocaleString("en-US", { maximumFractionDigits: 2 })}</td>
+      <td data-label="Buy Price">${buyP}</td><td data-label="Now Price">${nowP}</td>
+      <td data-label="Cost">${fmtTHB(r.cost)}</td><td data-label="Value">${fmtTHB(r.value)}</td>
+      <td data-label="Weight">${(weight * 100).toFixed(1)}%</td>
+      <td data-label="Return" class="${cls(r.ret)}">${fmtPct(r.ret)}</td>
+    </tr>`;
+  }).join("");
 }
 
 /* ---------- #5 Benchmark comparison (rebased to first day = 100) ---------- */
@@ -264,13 +318,14 @@ function groupAlloc(rows, mode) {
 
 function renderAllocChart(rows, mode) {
   const entries = groupAlloc(rows, mode);
+  const kind = mode === "holding" ? "ticker" : mode; // class | theme
   if (allocChartRef) allocChartRef.destroy();
   allocChartRef = new Chart(document.getElementById("allocChart"), {
     type: "doughnut",
     data: {
       labels: entries.map((e) => e[0]),
       datasets: [{ data: entries.map((e) => e[1]),
-        backgroundColor: entries.map((_, i) => PALETTE[i % PALETTE.length]),
+        backgroundColor: entries.map((e) => colorFor(kind, e[0])),
         borderColor: "#1a2129", borderWidth: 2 }],
     },
     options: {
@@ -303,11 +358,11 @@ function renderCompositionChart(history) {
   if (!pts.length) return;
   const classes = [];
   pts.forEach((p) => Object.keys(p.byClass).forEach((c) => { if (!classes.includes(c)) classes.push(c); }));
-  const datasets = classes.map((c, i) => ({
+  const datasets = classes.map((c) => ({
     label: c,
     data: pts.map((p) => p.byClass[c] || 0),
-    backgroundColor: PALETTE[i % PALETTE.length] + "cc",
-    borderColor: PALETTE[i % PALETTE.length],
+    backgroundColor: colorFor("class", c) + "cc",
+    borderColor: colorFor("class", c),
     fill: true, tension: 0.2, pointRadius: pts.length > 40 ? 0 : 2,
   }));
   new Chart(document.getElementById("compositionChart"), {
@@ -364,7 +419,7 @@ function renderConcentration(rows) {
   new Chart(document.getElementById("themeChart"), {
     type: "bar",
     data: { labels: themes.map((t) => t[0]),
-      datasets: [{ data: themes.map((t) => t[1] / total * 100), backgroundColor: themes.map((_, i) => PALETTE[i % PALETTE.length]) }] },
+      datasets: [{ data: themes.map((t) => t[1] / total * 100), backgroundColor: themes.map((t) => colorFor("theme", t[0])) }] },
     options: {
       indexAxis: "y", maintainAspectRatio: false,
       plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => c.parsed.x.toFixed(1) + "% (" + fmtTHB(c.parsed.x / 100 * total) + ")" } } },
@@ -567,7 +622,7 @@ function renderDividends(rows) {
   new Chart(document.getElementById("divChart"), {
     type: "bar",
     data: { labels: dv.map((r) => r.ticker),
-      datasets: [{ data: dv.map((r) => r.annualIncome), backgroundColor: dv.map((_, i) => PALETTE[i % PALETTE.length]) }] },
+      datasets: [{ data: dv.map((r) => r.annualIncome), backgroundColor: dv.map((r) => colorFor("ticker", r.ticker)) }] },
     options: {
       maintainAspectRatio: false,
       plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => fmtTHB(c.parsed.y) } } },
@@ -586,12 +641,12 @@ function renderDividends(rows) {
       ? '<span class="muted">n/a</span>'
       : `<span class="${diverges ? (r.trailingYield > r.estYield ? "pos" : "neg") : ""}">${(r.trailingYield * 100).toFixed(2)}%${diverges ? " *" : ""}</span>`;
     return `<tr>
-      <td class="ticker">${r.ticker}</td>
-      <td>${FREQ[r.divFreq] || r.divFreq || "—"}</td>
-      <td>${pctOrDash(r.estYield || null)}</td>
-      <td>${actualCell}</td>
-      <td>${pctOrDash(r.avg3yYield)}</td>
-      <td>${fmtTHB(r.annualIncome)}</td></tr>`;
+      <td class="ticker" data-label="Ticker">${r.ticker}</td>
+      <td data-label="Freq">${FREQ[r.divFreq] || r.divFreq || "—"}</td>
+      <td data-label="Est. Yield">${pctOrDash(r.estYield || null)}</td>
+      <td data-label="Actual (TTM)">${actualCell}</td>
+      <td data-label="3-yr Avg">${pctOrDash(r.avg3yYield)}</td>
+      <td data-label="Net Income">${fmtTHB(r.annualIncome)}</td></tr>`;
   }).join("");
   const base = flagged
     ? '<strong>*</strong> actual trailing yield differs from your estimate by &gt;0.5pp. Thai stocks can include large special dividends, inflating the trailing figure.'
@@ -635,11 +690,11 @@ function renderWatchlist(portfolio, snap) {
     return { ...w, now, change };
   });
   document.querySelector("#watchTable tbody").innerHTML = rows.map((w) => `<tr>
-      <td class="ticker">${w.ticker}</td><td>${w.name}</td>
-      <td><span class="tag">${w.theme || "-"}</span></td>
-      <td>${fmtTHB2(w.refPriceTHB)}</td>
-      <td>${w.now == null ? '<span class="muted">n/a</span>' : fmtTHB2(w.now)}</td>
-      <td class="${w.change == null ? "muted" : cls(w.change)}">${w.change == null ? "—" : fmtPct(w.change)}</td>
+      <td class="ticker" data-label="Ticker">${w.ticker}</td><td data-label="Name">${w.name}</td>
+      <td data-label="Theme"><span class="tag">${w.theme || "-"}</span></td>
+      <td data-label="Ref Price">${fmtTHB2(w.refPriceTHB)}</td>
+      <td data-label="Now">${w.now == null ? '<span class="muted">n/a</span>' : fmtTHB2(w.now)}</td>
+      <td data-label="Change" class="${w.change == null ? "muted" : cls(w.change)}">${w.change == null ? "—" : fmtPct(w.change)}</td>
     </tr>`).join("");
 }
 
@@ -692,6 +747,7 @@ async function main() {
       getJSON("portfolio.json"), getJSON("prices.json"), getJSON("history.json").catch(() => []),
     ]);
     DATA = { portfolio, snap, history };
+    buildColors(portfolio);
     const rows = computeHoldings(portfolio, snap);
     const totalCost = portfolio.meta.baseCapitalTHB;
 
@@ -699,6 +755,7 @@ async function main() {
       `${portfolio.meta.name} · invested ${portfolio.meta.investmentDate} · prices as of ${snap.date}`;
     document.getElementById("updatedAt").textContent =
       snap.updatedAt ? " Last update: " + new Date(snap.updatedAt).toLocaleString() : "";
+    renderFreshness(snap);
 
     renderCards(rows, snap, portfolio); // persistent KPI bar
 
@@ -736,6 +793,22 @@ async function main() {
   }
 }
 
+function renderFreshness(snap) {
+  const el = document.getElementById("freshness");
+  if (!el) return;
+  const today = new Date().toISOString().slice(0, 10);
+  const dataDate = snap.date;
+  const days = Math.round((new Date(today) - new Date(dataDate)) / 86400000);
+  if (days <= 0) {
+    el.className = "badge fresh";
+    el.textContent = "Live · updated today";
+  } else {
+    el.className = "badge stale";
+    el.textContent = days === 1 ? "Updated yesterday" : `Updated ${days}d ago`;
+  }
+  el.title = `Prices as of ${dataDate}` + (snap.updatedAt ? ` (${new Date(snap.updatedAt).toLocaleString()})` : "");
+}
+
 function setupTabs(renderers) {
   const rendered = new Set();
   function activate(tab) {
@@ -747,15 +820,25 @@ function setupTabs(renderers) {
       renderers[tab] && renderers[tab]();
       rendered.add(tab);
     } else {
-      // already drawn — just make sure charts fit their (now visible) container
       document.querySelectorAll(`.tab-panel[data-tab="${tab}"] canvas`).forEach((c) => {
         const ch = Chart.getChart(c);
         if (ch) ch.resize();
       });
     }
   }
+  const tabNames = Object.keys(renderers);
   document.querySelectorAll("#tabs button").forEach((b) =>
     b.addEventListener("click", () => activate(b.dataset.tab)));
+
+  // Print / PDF: render every tab first (so all charts exist & are sized), then print.
+  const printBtn = document.getElementById("printBtn");
+  if (printBtn) printBtn.addEventListener("click", () => {
+    const current = document.querySelector("#tabs button.active").dataset.tab;
+    tabNames.forEach((t) => activate(t));
+    activate(current);
+    setTimeout(() => window.print(), 300);
+  });
+
   activate("overview");
 }
 

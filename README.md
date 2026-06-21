@@ -22,8 +22,14 @@ Initial investment: **12 June 2026**, cost basis **฿100,000,000**.
 - **Return-by-holding** and **contribution-to-total-return** charts
 - **Movers today** — biggest gainer / loser
 - **Dividend income** chart + table (uses each holding's yield & frequency)
-- **Per-holding table**: units, buy price, current price, value, weight, return
+- **Per-holding table**: units, buy price, current price, value, weight, return (sortable)
 - **Stock lookup** + a **watchlist** of other tickers you're considering
+
+### Presentation
+- **Tabbed dashboard** (Overview / Performance / Risk & FX / Income / Holdings) with a persistent KPI bar
+- **Mobile-friendly**: tables collapse into stacked cards on phones
+- **Consistent colors** per asset class/holding across all charts; **ⓘ tooltips** explain the jargon
+- **Freshness badge** (live / stale), **loading skeletons**, and **Print → Save as PDF** for sharing
 
 ## How it works (no backend needed)
 

@@ -9,12 +9,24 @@
 </head>
 <body>
   <header>
-    <h1>📈 Investment Portfolio Tracker</h1>
-    <div class="sub" id="subline">Loading…</div>
+    <div class="header-row">
+      <div>
+        <h1>📈 Investment Portfolio Tracker</h1>
+        <div class="sub" id="subline">Loading…</div>
+      </div>
+      <div class="header-actions">
+        <span id="freshness" class="badge">Loading…</span>
+        <button id="printBtn" class="btn-ghost" title="Open print dialog — save as PDF to share">Print / PDF</button>
+      </div>
+    </div>
   </header>
 
   <main>
-    <div class="cards" id="cards"></div>
+    <div class="cards" id="cards">
+      <div class="card skeleton card-sk"></div><div class="card skeleton card-sk"></div>
+      <div class="card skeleton card-sk"></div><div class="card skeleton card-sk"></div>
+      <div class="card skeleton card-sk"></div>
+    </div>
 
     <nav class="tabs" id="tabs">
       <button class="active" data-tab="overview">Overview</button>
@@ -29,7 +41,7 @@
       <div class="section">
         <div class="grid-2">
           <div class="panel">
-            <h3>Portfolio vs Benchmarks <span class="muted">(rebased to 100 on 12 Jun; Policy = target-weighted blend)</span></h3>
+            <h3>Portfolio vs Benchmarks <span class="muted">(rebased to 100 on 12 Jun)</span><i class="info" title="Each line starts at 100 on the investment date so you compare growth. 'Policy Benchmark' is a blend weighted to your target allocation (≈65% S&P / 10% SET / 15% gold / 10% cash) — the fair yardstick for a multi-asset portfolio.">i</i></h3>
             <div class="chart-wrap"><canvas id="benchChart"></canvas></div>
           </div>
           <div class="panel">
@@ -75,7 +87,7 @@
       </div>
       <div class="section">
         <div class="panel">
-          <h3>Contribution to Total Return <span class="muted">(% of cost basis)</span></h3>
+          <h3>Contribution to Total Return <span class="muted">(% of cost basis)</span><i class="info" title="How many percentage points each holding added to (or subtracted from) the total portfolio return. A holding's contribution = its gain/loss in THB ÷ total cost basis. They sum to the overall return.">i</i></h3>
           <div class="chart-wrap"><canvas id="contribChart"></canvas></div>
         </div>
       </div>
@@ -84,7 +96,7 @@
     <!-- RISK & FX -->
     <div class="tab-panel" data-tab="risk">
       <div class="section">
-        <h2>Risk &amp; Concentration</h2>
+        <h2>Risk &amp; Concentration<i class="info" title="Effective # of holdings = 1 ÷ HHI (Herfindahl index, the sum of squared weights). It tells you how many 'equal-sized' positions your portfolio really behaves like — lower than your position count means concentration. Volatility/drawdown are computed from daily history.">i</i></h2>
         <div class="cards" id="riskCards"></div>
         <div class="cards" id="riskMetrics"></div>
         <p class="muted" id="riskNote" style="margin:0 0 16px;font-size:0.8rem"></p>
@@ -94,7 +106,7 @@
         </div>
       </div>
       <div class="section">
-        <h2>Currency (FX) Impact <span class="muted">— USD holdings</span></h2>
+        <h2>Currency (FX) Impact <span class="muted">— USD holdings</span><i class="info" title="Your USD holdings' THB return has two parts: the stock's move in USD (local price) and the THB/USD exchange-rate move (currency). This splits how much of your gain/loss came from each.">i</i></h2>
         <div class="cards" id="fxCards"></div>
         <div class="panel">
           <h3>Return Attribution: Local Price vs Currency <span class="muted">(THB return, %)</span></h3>
@@ -113,8 +125,8 @@
             <div class="chart-wrap"><canvas id="divChart"></canvas></div>
           </div>
           <div class="panel table-scroll">
-            <h3>Your estimate vs actual</h3>
-            <table id="divTable">
+            <h3>Your estimate vs actual<i class="info" title="Actual (TTM) = the real dividends paid over the last 12 months ÷ current price. 3-yr Avg = average of the last 3 complete calendar years' payouts ÷ price. Comparing these to your estimate reveals over-optimistic assumptions or one-off special dividends.">i</i></h3>
+            <table id="divTable" class="rt">
               <thead>
                 <tr><th>Ticker</th><th>Freq</th><th>Est. Yield</th><th>Actual (TTM)</th><th>3-yr Avg</th><th>Net Income (THB)</th></tr>
               </thead>
@@ -135,14 +147,8 @@
       <div class="section">
         <h2>Holdings — Return since 12 June 2026</h2>
         <div class="panel table-scroll">
-          <table id="holdingsTable">
-            <thead>
-              <tr>
-                <th>Ticker</th><th>Name</th><th>Class</th><th>Units</th>
-                <th>Buy Price</th><th>Now Price</th><th>Cost (THB)</th>
-                <th>Value (THB)</th><th>Weight</th><th>Return</th>
-              </tr>
-            </thead>
+          <table id="holdingsTable" class="rt">
+            <thead><tr></tr></thead>
             <tbody></tbody>
           </table>
         </div>
@@ -164,7 +170,7 @@
         <div class="panel" style="margin-top:16px;">
           <h3>Watchlist (price since 12 June reference)</h3>
           <div class="table-scroll">
-            <table id="watchTable">
+            <table id="watchTable" class="rt">
               <thead>
                 <tr><th>Ticker</th><th>Name</th><th>Theme</th><th>Ref Price (THB)</th><th>Now (THB)</th><th>Change</th></tr>
               </thead>
