@@ -18,12 +18,52 @@
     <div class="section">
       <div class="grid-2">
         <div class="panel">
-          <h3>Portfolio Value Over Time (THB)</h3>
-          <div class="chart-wrap"><canvas id="historyChart"></canvas></div>
+          <h3>Portfolio vs Benchmarks <span class="muted">(rebased to 100 on 12 Jun)</span></h3>
+          <div class="chart-wrap"><canvas id="benchChart"></canvas></div>
         </div>
         <div class="panel">
-          <h3>Allocation by Holding (current value)</h3>
+          <div class="panel-head">
+            <h3>Allocation</h3>
+            <div class="toggle" id="allocToggle">
+              <button class="active" data-mode="holding">Holding</button>
+              <button data-mode="class">Class</button>
+              <button data-mode="theme">Theme</button>
+            </div>
+          </div>
           <div class="chart-wrap"><canvas id="allocChart"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="panel">
+        <h3>Composition Over Time (by asset class, THB)</h3>
+        <div class="chart-wrap"><canvas id="compositionChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="grid-2">
+        <div class="panel">
+          <h3>Current vs Target Allocation</h3>
+          <div class="chart-wrap"><canvas id="targetChart"></canvas></div>
+        </div>
+        <div class="panel">
+          <h3>Return by Holding (%)</h3>
+          <div class="chart-wrap"><canvas id="returnChart"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="grid-2">
+        <div class="panel">
+          <h3>Contribution to Total Return <span class="muted">(% of cost basis)</span></h3>
+          <div class="chart-wrap"><canvas id="contribChart"></canvas></div>
+        </div>
+        <div class="panel">
+          <h3>Movers Today</h3>
+          <div id="movers"></div>
         </div>
       </div>
     </div>
@@ -45,9 +85,21 @@
     </div>
 
     <div class="section">
-      <h2>Return by Holding (%)</h2>
-      <div class="panel">
-        <div class="chart-wrap"><canvas id="returnChart"></canvas></div>
+      <h2>Dividend Income (estimated)</h2>
+      <div class="grid-2">
+        <div class="panel">
+          <h3>Annual Dividend by Holding (THB)</h3>
+          <div class="chart-wrap"><canvas id="divChart"></canvas></div>
+        </div>
+        <div class="panel table-scroll">
+          <h3>Details</h3>
+          <table id="divTable">
+            <thead>
+              <tr><th>Ticker</th><th>Yield</th><th>Frequency</th><th>Annual Income (THB)</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
       </div>
     </div>
 

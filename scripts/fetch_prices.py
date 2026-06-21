@@ -104,33 +104,50 @@ def main():
 
     # --- compute total portfolio value in THB for the history series ---
     rate = usdthb["price"]
+    gold_thb = gold["price"] * oz_per_baht * rate if (gold["ok"] and rate) else None
     total = 0.0
     valued = True
+    by_class = {}
+
+    def add_class(cls_name, amount):
+        by_class[cls_name] = round(by_class.get(cls_name, 0.0) + amount, 2)
+
     for h in portfolio["holdings"]:
         mk = h["market"]
+        cls_name = h.get("class", mk)
         if mk == "CASH":
             total += h["buyValueTHB"]
+            add_class(cls_name, h["buyValueTHB"])
             continue
         if mk == "GOLD":
-            if gold["ok"] and rate:
-                total += gold["price"] * oz_per_baht * rate * h["units"]
+            if gold_thb is not None:
+                v = gold_thb * h["units"]
             else:
-                total += h["buyValueTHB"]
+                v = h["buyValueTHB"]
                 valued = False
+            total += v
+            add_class(cls_name, v)
             continue
         q = prices.get(h["symbol"], {})
         if not q.get("ok"):
             total += h["buyValueTHB"]
+            add_class(cls_name, h["buyValueTHB"])
             valued = False
             continue
         if mk == "US":
-            if rate:
-                total += q["price"] * rate * h["units"]
-            else:
-                total += h["buyValueTHB"]
+            v = q["price"] * rate * h["units"] if rate else h["buyValueTHB"]
+            if not rate:
                 valued = False
         elif mk == "TH":
-            total += q["price"] * h["units"]
+            v = q["price"] * h["units"]
+        else:
+            v = h["buyValueTHB"]
+        total += v
+        add_class(cls_name, v)
+
+    # Benchmark raw price levels (THB) so the page can rebase to the buy date.
+    voo = prices.get("VOO", {})
+    sp500_thb = voo["price"] * rate if (voo.get("ok") and rate) else None
 
     history = load_json(HISTORY, [])
     today = now.strftime("%Y-%m-%d")
@@ -139,6 +156,8 @@ def main():
         "totalValueTHB": round(total, 2),
         "usdthb": rate,
         "complete": valued,
+        "byClass": by_class,
+        "benchmarks": {"sp500THB": sp500_thb, "goldTHB": gold_thb},
     }
     # Replace today's point if it already exists, else append.
     history = [p for p in history if p.get("date") != today]

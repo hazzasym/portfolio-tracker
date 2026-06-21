@@ -10,10 +10,15 @@ Initial investment: **12 June 2026**, cost basis **฿100,000,000**.
 
 - **Current portfolio value** and total return vs the 12 June investment date
 - **Day change** vs previous close, and live USD/THB rate
-- **Value-over-time** line chart (built from a daily snapshot history)
-- **Allocation** doughnut chart by holding
+- **Estimated annual dividend income** + portfolio yield
+- **Portfolio vs benchmarks** — your value rebased to 100 on 12 Jun vs S&P 500 (VOO) and gold
+- **Composition over time** — stacked area of asset-class mix
+- **Allocation** doughnut with a toggle: by holding / asset class / theme
+- **Current vs target allocation** bar (shows rebalancing drift)
+- **Return-by-holding** and **contribution-to-total-return** charts
+- **Movers today** — biggest gainer / loser
+- **Dividend income** chart + table (uses each holding's yield & frequency)
 - **Per-holding table**: units, buy price, current price, value, weight, return
-- **Return-by-holding** bar chart
 - **Stock lookup** + a **watchlist** of other tickers you're considering
 
 ## How it works (no backend needed)
