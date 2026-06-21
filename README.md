@@ -39,9 +39,16 @@ baht-weight (`ozPerBahtWeight` in `portfolio.json`). Cash is held at face value.
 ## Run locally
 
 ```bash
-python3 scripts/fetch_prices.py     # refresh prices.json + history.json
-python3 -m http.server 8000         # then open http://localhost:8000
+python3 scripts/fetch_prices.py       # refresh prices.json + history.json (today)
+python3 scripts/backfill_history.py   # one-off: reconstruct history from the
+                                      # investment date using historical closes
+python3 -m http.server 8000           # then open http://localhost:8000
 ```
+
+The time-series charts (composition, portfolio-vs-benchmark) are built from
+`history.json`, which gains **one point per day**. Run `backfill_history.py`
+once to populate past days from your investment date; after that the daily job
+keeps extending it.
 
 ## Deploy to GitHub Pages (so friends can view it)
 

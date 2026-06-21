@@ -167,27 +167,22 @@ function renderHoldingsTable(rows) {
     }).join("");
 }
 
-/* ---------- #5 Benchmark comparison (rebased to 12 Jun) ---------- */
+/* ---------- #5 Benchmark comparison (rebased to first day = 100) ---------- */
+function rebase(values) {
+  const baseVal = values.find((v) => v != null);
+  return values.map((v) => (v == null || !baseVal ? null : (v / baseVal) * 100));
+}
 function renderBenchChart(history, portfolio) {
-  const base = portfolio.meta.baseCapitalTHB;
-  const voo = portfolio.holdings.find((h) => h.ticker === "VOO");
-  const goldH = portfolio.holdings.find((h) => h.market === "GOLD");
-  const vooBuy = voo ? voo.buyPriceTHB : null;
-  const goldBuy = goldH ? goldH.buyPriceTHB : null;
+  const labels = history.map((p) => p.date);
 
-  const labels = ["2026-06-12", ...history.map((p) => p.date)];
-  const idx = (arr) => [100, ...arr];
-
-  const port = history.map((p) => (p.totalValueTHB / base) * 100);
-  const sp = history.map((p) =>
-    p.benchmarks && p.benchmarks.sp500THB && vooBuy ? (p.benchmarks.sp500THB / vooBuy) * 100 : null);
-  const gold = history.map((p) =>
-    p.benchmarks && p.benchmarks.goldTHB && goldBuy ? (p.benchmarks.goldTHB / goldBuy) * 100 : null);
+  const port = rebase(history.map((p) => p.totalValueTHB));
+  const sp = rebase(history.map((p) => (p.benchmarks ? p.benchmarks.sp500THB : null)));
+  const gold = rebase(history.map((p) => (p.benchmarks ? p.benchmarks.goldTHB : null)));
 
   const datasets = [
-    { label: "My Portfolio", data: idx(port), borderColor: "#4dabf7", backgroundColor: "rgba(77,171,247,.12)", fill: true, tension: 0.25 },
-    { label: "S&P 500 (VOO)", data: idx(sp), borderColor: "#e3b341", fill: false, tension: 0.25, borderDash: [6, 4] },
-    { label: "Gold", data: idx(gold), borderColor: "#9775fa", fill: false, tension: 0.25, borderDash: [2, 3] },
+    { label: "My Portfolio", data: port, borderColor: "#4dabf7", backgroundColor: "rgba(77,171,247,.12)", fill: true, tension: 0.25 },
+    { label: "S&P 500 (VOO)", data: sp, borderColor: "#e3b341", fill: false, tension: 0.25, borderDash: [6, 4] },
+    { label: "Gold", data: gold, borderColor: "#9775fa", fill: false, tension: 0.25, borderDash: [2, 3] },
   ];
   new Chart(document.getElementById("benchChart"), {
     type: "line",
