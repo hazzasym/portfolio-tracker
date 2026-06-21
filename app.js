@@ -376,6 +376,112 @@ function renderConcentration(rows) {
   });
 }
 
+/* ---------- Risk metrics from daily history (vol, drawdown) ---------- */
+function renderRiskMetrics(history) {
+  const MIN = 15;
+  const vals = history.map((p) => p.totalValueTHB).filter((v) => v != null);
+  const note = document.getElementById("riskNote");
+  if (vals.length < 3) {
+    document.getElementById("riskMetrics").innerHTML = "";
+    note.textContent = `Risk metrics (volatility, drawdown) appear once a few days of history accrue (currently ${vals.length}).`;
+    return;
+  }
+  const rets = [];
+  for (let i = 1; i < vals.length; i++) rets.push(vals[i] / vals[i - 1] - 1);
+  const mean = rets.reduce((s, r) => s + r, 0) / rets.length;
+  const variance = rets.reduce((s, r) => s + (r - mean) ** 2, 0) / Math.max(1, rets.length - 1);
+  const dailyVol = Math.sqrt(variance);
+  const annVol = dailyVol * Math.sqrt(252);
+
+  let peak = vals[0], maxDD = 0;
+  vals.forEach((v) => { if (v > peak) peak = v; maxDD = Math.min(maxDD, v / peak - 1); });
+
+  const best = Math.max(...rets), worst = Math.min(...rets);
+  const limited = vals.length < MIN;
+
+  const cards = [
+    { label: "Volatility (annualized)", value: (annVol * 100).toFixed(1) + "%",
+      delta: `Daily σ ${(dailyVol * 100).toFixed(2)}%` },
+    { label: "Max Drawdown", value: `<span class="${maxDD < 0 ? "neg" : "muted"}">${(maxDD * 100).toFixed(2)}%</span>`,
+      delta: "Peak-to-trough" },
+    { label: "Best Day", value: `<span class="pos">${fmtPct(best)}</span>`, delta: "Single-day gain" },
+    { label: "Worst Day", value: `<span class="neg">${fmtPct(worst)}</span>`, delta: "Single-day loss" },
+  ];
+  document.getElementById("riskMetrics").innerHTML = cards
+    .map((c) => `<div class="card"><div class="label">${c.label}</div>
+      <div class="value">${c.value}</div><div class="delta">${c.delta}</div></div>`).join("");
+  note.innerHTML = limited
+    ? `<strong>Note:</strong> based on only ${vals.length} days — treat as indicative; these stabilize after ~${MIN}+ trading days.`
+    : `Computed from ${vals.length} daily observations.`;
+}
+
+/* ---------- FX attribution for USD holdings ---------- */
+function renderFXAttribution(rows, snap, portfolio) {
+  const buyRate = portfolio.meta.buyExchangeRateUSDTHB;
+  const rate = snap.usdthb && snap.usdthb.price;
+  const us = rows.filter((r) => r.market === "US" && r.nowPrice != null);
+  if (!rate || !us.length) { document.getElementById("fxCards").innerHTML = ""; return; }
+
+  const fxRet = rate / buyRate - 1;
+  // USD sleeve P/L split: price effect (local) vs currency effect.
+  let costSleeve = 0, curUSDxUnits = 0, buyUSDxUnits = 0;
+  us.forEach((r) => {
+    const buyUSD = r.buyPriceTHB / buyRate;
+    const curUSD = r.nowPrice / rate; // back out native USD from THB price
+    costSleeve += r.cost;
+    curUSDxUnits += curUSD * r.units;
+    buyUSDxUnits += buyUSD * r.units;
+  });
+  // Value if FX hadn't moved (held at buy rate):
+  const valueAtBuyRate = curUSDxUnits * buyRate;
+  const actualValue = curUSDxUnits * rate;
+  const fxPL = actualValue - valueAtBuyRate;       // pure currency P/L
+  const pricePL = valueAtBuyRate - buyUSDxUnits * buyRate; // local price P/L
+
+  const cards = [
+    { label: "THB / USD move", value: `<span class="${cls(fxRet)}">${fmtPct(fxRet)}</span>`,
+      delta: `${buyRate.toFixed(2)} → ${rate.toFixed(2)}` },
+    { label: "Currency P/L (USD sleeve)", value: `<span class="${cls(fxPL)}">${sign(fxPL)}${fmtTHB(fxPL)}</span>`,
+      delta: "from THB/USD alone" },
+    { label: "Local Price P/L (USD sleeve)", value: `<span class="${cls(pricePL)}">${sign(pricePL)}${fmtTHB(pricePL)}</span>`,
+      delta: "from stock prices" },
+    { label: "USD Sleeve Exposure", value: (costSleeve / portfolio.meta.baseCapitalTHB * 100).toFixed(0) + "%",
+      delta: "of portfolio at cost" },
+  ];
+  document.getElementById("fxCards").innerHTML = cards
+    .map((c) => `<div class="card"><div class="label">${c.label}</div>
+      <div class="value">${c.value}</div><div class="delta">${c.delta}</div></div>`).join("");
+
+  // Per-holding stacked decomposition: local price effect + currency effect = total THB return.
+  const data = us.map((r) => {
+    const buyUSD = r.buyPriceTHB / buyRate;
+    const curUSD = r.nowPrice / rate;
+    const local = curUSD / buyUSD - 1;        // local price return
+    const total = r.ret;                       // THB total return
+    return { t: r.ticker, local: local * 100, fx: (total - local) * 100, total: total * 100 };
+  }).sort((a, b) => b.total - a.total);
+
+  new Chart(document.getElementById("fxChart"), {
+    type: "bar",
+    data: {
+      labels: data.map((d) => d.t),
+      datasets: [
+        { label: "Local price", data: data.map((d) => d.local), backgroundColor: "#4dabf7", stack: "s" },
+        { label: "Currency (FX)", data: data.map((d) => d.fx), backgroundColor: "#ff922b", stack: "s" },
+      ],
+    },
+    options: {
+      maintainAspectRatio: false,
+      plugins: { legend: { labels: { color: "#e6edf3", boxWidth: 12 } },
+        tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${sign(c.parsed.y)}${c.parsed.y.toFixed(2)}pp` } } },
+      scales: {
+        x: { stacked: true, ticks: { color: AXIS }, grid: { display: false } },
+        y: { stacked: true, ticks: { color: AXIS, callback: (v) => v + "%" }, grid: { color: GRID } },
+      },
+    },
+  });
+}
+
 /* ---------- #1 Current vs target allocation ---------- */
 function renderTargetChart(rows) {
   const total = rows.reduce((s, r) => s + r.value, 0);
@@ -601,6 +707,8 @@ async function main() {
     }
     setupAllocToggle(rows);
     renderConcentration(rows);
+    renderRiskMetrics(history || []);
+    renderFXAttribution(rows, snap, portfolio);
     renderTargetChart(rows);
     renderReturnChart(rows);
     renderContribChart(rows, totalCost);

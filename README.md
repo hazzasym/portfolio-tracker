@@ -13,7 +13,8 @@ Initial investment: **12 June 2026**, cost basis **฿100,000,000**.
 - **Dividend income from actual payouts** — pulls each holding's real dividends (last ~5 yrs), shows trailing-12-month yield, **3-year average**, and your estimate side by side, plus a yield-by-year trend chart
 - **Total return** (price + net dividends received) over the holding period
 - **Portfolio vs benchmarks** — rebased to 100 on 12 Jun vs a **target-weighted policy benchmark** (the fair comparison), plus S&P 500 (VOO) and gold references
-- **Risk & concentration** — largest position, top-3 concentration, effective # of holdings (HHI), and theme/sector exposure
+- **Risk & concentration** — largest position, top-3 concentration, effective # of holdings (HHI), theme/sector exposure, plus annualized volatility & max drawdown (once enough daily history accrues)
+- **Currency (FX) impact** — splits USD holdings' returns into local price effect vs THB/USD currency effect
 - **Net-of-tax dividends** — income shown after US (15%) / Thai (10%) withholding tax
 - **Composition over time** — stacked area of asset-class mix
 - **Allocation** doughnut with a toggle: by holding / asset class / theme

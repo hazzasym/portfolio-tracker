@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Investment Portfolio Tracker</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='14' font-size='14'>%F0%9F%93%88</text></svg>" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -71,9 +72,20 @@
     <div class="section">
       <h2>Risk &amp; Concentration</h2>
       <div class="cards" id="riskCards"></div>
+      <div class="cards" id="riskMetrics"></div>
+      <p class="muted" id="riskNote" style="margin:0 0 16px;font-size:0.8rem"></p>
       <div class="panel">
         <h3>Exposure by Theme / Sector</h3>
         <div class="chart-wrap"><canvas id="themeChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Currency (FX) Impact <span class="muted">— USD holdings</span></h2>
+      <div class="cards" id="fxCards"></div>
+      <div class="panel">
+        <h3>Return Attribution: Local Price vs Currency <span class="muted">(THB return, %)</span></h3>
+        <div class="chart-wrap"><canvas id="fxChart"></canvas></div>
       </div>
     </div>
 
