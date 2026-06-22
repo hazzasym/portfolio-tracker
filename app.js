@@ -6,6 +6,8 @@ const fmtTHB = (n) =>
   "฿" + Number(n).toLocaleString("en-US", { maximumFractionDigits: 0 });
 const fmtTHB2 = (n) =>
   "฿" + Number(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const fmtUSD2 = (n) =>
+  "$" + Number(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const fmtPct = (n) => (n >= 0 ? "+" : "") + (n * 100).toFixed(2) + "%";
 const cls = (n) => (n > 0 ? "pos" : n < 0 ? "neg" : "muted");
 const sign = (n) => (n >= 0 ? "+" : "");
@@ -192,6 +194,53 @@ function renderCards(rows, snap, portfolio) {
     .map((c) => `<div class="card"><div class="label">${c.label}</div>
       <div class="value">${c.value}</div><div class="delta">${c.delta}</div></div>`)
     .join("");
+}
+
+function quoteFor(row, snap) {
+  if (row.market === "GOLD") return snap.gold || null;
+  return snap.prices && snap.prices[row.symbol] ? snap.prices[row.symbol] : null;
+}
+
+function formatNativePrice(row, snap) {
+  if (row.market === "CASH") return '<span class="muted">Cash balance</span>';
+  const q = quoteFor(row, snap);
+  if (!q || !q.ok || q.price == null) return '<span class="muted">n/a</span>';
+  if (row.market === "US") return `${fmtUSD2(q.price)} <span class="muted">USD</span>`;
+  if (row.market === "TH") return `${fmtTHB2(q.price)} <span class="muted">THB</span>`;
+  if (row.market === "GOLD") return `${fmtUSD2(q.price)} <span class="muted">/ oz</span>`;
+  return '<span class="muted">n/a</span>';
+}
+
+function formatTHBUnit(row) {
+  if (row.market === "CASH") return '<span class="muted">—</span>';
+  if (row.nowPrice == null) return '<span class="muted">n/a</span>';
+  const unit = row.market === "GOLD" ? ' <span class="muted">/ baht wt.</span>' : "";
+  return `${fmtTHB2(row.nowPrice)}${unit}`;
+}
+
+function renderLatestPrices(rows, snap) {
+  const stamp = document.getElementById("latestPricesStamp");
+  if (stamp) {
+    const updateText = snap.updatedAt
+      ? new Date(snap.updatedAt).toLocaleString()
+      : snap.date;
+    stamp.textContent = `Snapshot ${snap.date} · updated ${updateText}`;
+  }
+  const sorted = rows.slice().sort((a, b) => b.value - a.value);
+  document.querySelector("#latestPricesTable tbody").innerHTML = sorted.map((r) => {
+    const day = r.market === "CASH" || !r.valuedLive
+      ? '<span class="muted">—</span>'
+      : `<span class="${cls(r.dayChange)}">${fmtPct(r.dayChange)}</span>`;
+    return `<tr>
+      <td class="ticker" data-label="Ticker">${r.ticker}</td>
+      <td data-label="Asset">${r.name}</td>
+      <td data-label="Market"><span class="tag">${r.class}</span></td>
+      <td data-label="Native Price">${formatNativePrice(r, snap)}</td>
+      <td data-label="THB / Unit">${formatTHBUnit(r)}</td>
+      <td data-label="Day Change">${day}</td>
+      <td data-label="Value">${fmtTHB(r.value)}</td>
+    </tr>`;
+  }).join("");
 }
 
 const HOLDING_COLS = [
@@ -758,6 +807,7 @@ async function main() {
     renderFreshness(snap);
 
     renderCards(rows, snap, portfolio); // persistent KPI bar
+    renderLatestPrices(rows, snap);
 
     const hist = history || [];
     // Lazy per-tab renderers (charts only render once, when their tab is shown,

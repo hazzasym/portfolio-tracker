@@ -28,6 +28,29 @@
       <div class="card skeleton card-sk"></div>
     </div>
 
+    <section class="panel latest-prices" aria-labelledby="latestPricesTitle">
+      <div class="panel-head">
+        <h3 id="latestPricesTitle">Latest Holding Prices</h3>
+        <span class="muted" id="latestPricesStamp">Loading…</span>
+      </div>
+      <div class="table-scroll">
+        <table id="latestPricesTable" class="rt">
+          <thead>
+            <tr>
+              <th>Ticker</th>
+              <th>Asset</th>
+              <th>Market</th>
+              <th>Native Price</th>
+              <th>THB / Unit</th>
+              <th>Day Change</th>
+              <th>Value</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
     <nav class="tabs" id="tabs">
       <button class="active" data-tab="overview">Overview</button>
       <button data-tab="performance">Performance</button>
@@ -183,7 +206,7 @@
   </main>
 
   <footer>
-    Values in THB. Prices update automatically once per day via GitHub Actions.
+    Values in THB. Prices update automatically twice daily via GitHub Actions.
     Data source: Yahoo Finance. This is a personal class project, not financial advice.
     <span id="updatedAt"></span>
   </footer>

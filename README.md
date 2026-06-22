@@ -69,9 +69,10 @@ keeps extending it.
 4. **Settings → Actions → General → Workflow permissions** → enable
    **Read and write permissions** (so the daily job can commit price updates).
 
-The `Update prices` workflow runs once a day (and can be triggered manually from
-the **Actions** tab). It updates `prices.json` / `history.json`; the page reads
-them on load.
+The `Update prices` workflow runs twice a day: around **22:30 Bangkok time** for
+same-day local viewing, and again after the US market close. It can also be
+triggered manually from the **Actions** tab. It updates `prices.json` /
+`history.json`; the page reads them on load.
 
 ## Change / manage the portfolio
 

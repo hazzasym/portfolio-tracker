@@ -2,8 +2,9 @@ name: Update prices
 
 on:
   schedule:
-    # 22:30 UTC daily ≈ after US market close (handles weekdays; weekends just re-use last close)
-    - cron: "30 22 * * *"
+    # 15:30 UTC = 22:30 Bangkok for same-day local viewing.
+    # 22:30 UTC ≈ after US market close for final US prices.
+    - cron: "30 15,22 * * *"
   workflow_dispatch: {}   # allow manual run from the Actions tab
 
 permissions:
