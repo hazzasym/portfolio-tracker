@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-06-27T23:32:46.340309+00:00",
-  "date": "2026-06-27",
+  "updatedAt": "2026-06-28T16:40:17.704599+00:00",
+  "date": "2026-06-28",
   "usdthb": {
     "price": 33.3,
     "currency": "THB",
@@ -10,7 +10,7 @@
   "gold": {
     "price": 4096.3,
     "currency": "USD",
-    "previousClose": 4181.9,
+    "previousClose": 4129.9,
     "ok": true,
     "ozPerBahtWeight": 0.490147
   },
@@ -574,10 +574,6 @@
       "ttm": 9.09,
       "count": 21,
       "payouts": [
-        [
-          "2024-06-28",
-          1.784
-        ],
         [
           "2024-09-27",
           1.639
