@@ -1,14 +1,14 @@
 {
-  "updatedAt": "2026-07-02T23:33:47.515964+00:00",
-  "date": "2026-07-02",
+  "updatedAt": "2026-07-03T16:49:50.879597+00:00",
+  "date": "2026-07-03",
   "usdthb": {
-    "price": 33.19,
+    "price": 33.14,
     "currency": "THB",
     "previousClose": 33.4,
     "ok": true
   },
   "gold": {
-    "price": 4139.2,
+    "price": 4180.9,
     "currency": "USD",
     "previousClose": 4022.3,
     "ok": true,
@@ -16,9 +16,9 @@
   },
   "prices": {
     "ADVANC.BK": {
-      "price": 368.0,
+      "price": 375.0,
       "currency": "THB",
-      "previousClose": 352.0,
+      "previousClose": 357.0,
       "ok": true
     },
     "BE": {
@@ -78,7 +78,7 @@
     "SCB.BK": {
       "price": 153.5,
       "currency": "THB",
-      "previousClose": 145.0,
+      "previousClose": 146.5,
       "ok": true
     },
     "SPCX": {
