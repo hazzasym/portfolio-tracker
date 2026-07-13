@@ -1,14 +1,14 @@
 {
-  "updatedAt": "2026-07-13T17:26:02.299616+00:00",
+  "updatedAt": "2026-07-13T23:23:24.332926+00:00",
   "date": "2026-07-13",
   "usdthb": {
-    "price": 33.45,
+    "price": 33.47,
     "currency": "THB",
-    "previousClose": 33.267,
+    "previousClose": 33.36,
     "ok": true
   },
   "gold": {
-    "price": 4004.4,
+    "price": 4007.3,
     "currency": "USD",
     "previousClose": 4070.9,
     "ok": true,
@@ -22,55 +22,55 @@
       "ok": true
     },
     "BE": {
-      "price": 231.36,
+      "price": 233.49,
       "currency": "USD",
       "previousClose": 295.05,
       "ok": true
     },
     "CRWV": {
-      "price": 83.435,
+      "price": 83.31,
       "currency": "USD",
       "previousClose": 86.46,
       "ok": true
     },
     "GEV": {
-      "price": 1044.02,
+      "price": 1042.6,
       "currency": "USD",
       "previousClose": 1152.04,
       "ok": true
     },
     "GOOG": {
-      "price": 353.63,
+      "price": 350.67,
       "currency": "USD",
       "previousClose": 364.9,
       "ok": true
     },
     "JNJ": {
-      "price": 257.87,
+      "price": 257.77,
       "currency": "USD",
       "previousClose": 259.33,
       "ok": true
     },
     "LLY": {
-      "price": 1189.71,
+      "price": 1181.87,
       "currency": "USD",
       "previousClose": 1200.06,
       "ok": true
     },
     "NVDA": {
-      "price": 203.885,
+      "price": 203.53,
       "currency": "USD",
       "previousClose": 195.55,
       "ok": true
     },
     "PLTR": {
-      "price": 129.55,
+      "price": 130.04,
       "currency": "USD",
       "previousClose": 132.54,
       "ok": true
     },
     "RSP": {
-      "price": 214.25,
+      "price": 214.23,
       "currency": "USD",
       "previousClose": 215.0,
       "ok": true
@@ -82,25 +82,25 @@
       "ok": true
     },
     "SPCX": {
-      "price": 138.83,
+      "price": 139.14,
       "currency": "USD",
       "previousClose": 160.42,
       "ok": true
     },
     "SPY": {
-      "price": 749.563,
+      "price": 749.17,
       "currency": "USD",
       "previousClose": 751.28,
       "ok": true
     },
     "TSM": {
-      "price": 423.615,
+      "price": 421.58,
       "currency": "USD",
       "previousClose": 451.79,
       "ok": true
     },
     "VOO": {
-      "price": 688.94,
+      "price": 688.5,
       "currency": "USD",
       "previousClose": 690.62,
       "ok": true
