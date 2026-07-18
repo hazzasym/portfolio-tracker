@@ -15,6 +15,8 @@ import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
 
+from market_data import fetch_kasset_nav_quote
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PORTFOLIO = os.path.join(ROOT, "portfolio.json")
 PRICES = os.path.join(ROOT, "prices.json")
@@ -101,6 +103,31 @@ def load_json(path, default):
     return default
 
 
+def holdings_as_of(portfolio, as_of_date):
+    """Resolve scheduled replacements without activating them before startsOn."""
+    active = []
+    for holding in portfolio["holdings"]:
+        starts_on = holding.get("startsOn")
+        if not starts_on or as_of_date >= starts_on:
+            active.append(holding)
+            continue
+        predecessor = holding.get("replaces")
+        if not predecessor:
+            continue
+        active.append({
+            "ticker": predecessor["ticker"],
+            "symbol": predecessor["ticker"],
+            "name": predecessor.get("name", predecessor["ticker"]),
+            "class": predecessor.get("class", "Cash"),
+            "market": predecessor.get("market", "CASH"),
+            "targetWeight": holding["targetWeight"],
+            "units": 1,
+            "buyPriceTHB": predecessor["valueTHB"],
+            "buyValueTHB": predecessor["valueTHB"],
+        })
+    return active
+
+
 def main():
     portfolio = load_json(PORTFOLIO, None)
     if portfolio is None:
@@ -108,12 +135,18 @@ def main():
 
     meta = portfolio["meta"]
     oz_per_baht = meta.get("ozPerBahtWeight", 0.490147)
+    now = datetime.now(timezone.utc)
+    today = now.strftime("%Y-%m-%d")
+    holdings = holdings_as_of(portfolio, today)
 
     # Collect every symbol we need a live price for.
     symbols = set()
-    for h in portfolio["holdings"]:
+    kasset_funds = set()
+    for h in holdings:
         if h["market"] in ("US", "TH"):
             symbols.add(h["symbol"])
+        elif h["market"] == "TH_FUND":
+            kasset_funds.add(h["symbol"])
     for w in portfolio.get("watchlist", []):
         symbols.add(w["symbol"])
 
@@ -130,6 +163,9 @@ def main():
     for sym in sorted(symbols):
         print(f"Fetching {sym} ...")
         prices[sym] = fetch_quote(sym)
+    for fund_code in sorted(kasset_funds):
+        print(f"Fetching official KAsset NAV {fund_code} ...")
+        prices[fund_code] = fetch_kasset_nav_quote(fund_code)
 
     # Dividend history (per-share) for equities/funds so the page can show the
     # real trailing yield and multi-year trend vs the manual estimate.
@@ -138,7 +174,6 @@ def main():
         print(f"Fetching dividends {sym} ...")
         dividends[sym] = fetch_dividends(sym)
 
-    now = datetime.now(timezone.utc)
     snapshot = {
         "updatedAt": now.isoformat(),
         "date": now.strftime("%Y-%m-%d"),
@@ -147,10 +182,6 @@ def main():
         "prices": prices,
         "dividends": dividends,
     }
-
-    with open(PRICES, "w", encoding="utf-8") as f:
-        json.dump(snapshot, f, ensure_ascii=False, indent=2)
-    print(f"Wrote {PRICES}")
 
     # --- compute total portfolio value in THB for the history series ---
     rate = usdthb["price"]
@@ -162,7 +193,7 @@ def main():
     def add_class(cls_name, amount):
         by_class[cls_name] = round(by_class.get(cls_name, 0.0) + amount, 2)
 
-    for h in portfolio["holdings"]:
+    for h in holdings:
         mk = h["market"]
         cls_name = h.get("class", mk)
         if mk == "CASH":
@@ -188,7 +219,7 @@ def main():
             v = q["price"] * rate * h["units"] if rate else h["buyValueTHB"]
             if not rate:
                 valued = False
-        elif mk == "TH":
+        elif mk in ("TH", "TH_FUND"):
             v = q["price"] * h["units"]
         else:
             v = h["buyValueTHB"]
@@ -201,22 +232,34 @@ def main():
     set_thb = setidx["price"] if setidx.get("ok") else None
 
     history = load_json(HISTORY, [])
-    today = now.strftime("%Y-%m-%d")
+    version_date = meta.get("versionDate", meta["investmentDate"])
     point = {
         "date": today,
+        "portfolioVersion": (
+            meta.get("version") if today >= version_date
+            else meta.get("previousVersion", "round-1")
+        ),
         "totalValueTHB": round(total, 2),
         "usdthb": rate,
         "complete": valued,
         "byClass": by_class,
         "benchmarks": {"sp500THB": sp500_thb, "goldTHB": gold_thb, "setTHB": set_thb},
     }
-    # Replace today's point if it already exists, else append.
-    history = [p for p in history if p.get("date") != today]
-    history.append(point)
-    history.sort(key=lambda p: p["date"])
-    with open(HISTORY, "w", encoding="utf-8") as f:
-        json.dump(history, f, ensure_ascii=False, indent=2)
-    print(f"Wrote {HISTORY} (total today: {total:,.0f} THB)")
+    snapshot["complete"] = valued
+    with open(PRICES, "w", encoding="utf-8") as f:
+        json.dump(snapshot, f, ensure_ascii=False, indent=2)
+    print(f"Wrote {PRICES}")
+    if valued:
+        # Replace today's point if it already exists, else append. Incomplete
+        # fallback valuations must never corrupt the gain/loss history.
+        history = [p for p in history if p.get("date") != today]
+        history.append(point)
+        history.sort(key=lambda p: p["date"])
+        with open(HISTORY, "w", encoding="utf-8") as f:
+            json.dump(history, f, ensure_ascii=False, indent=2)
+        print(f"Wrote {HISTORY} (total today: {total:,.0f} THB)")
+    else:
+        print("Skipped history update because the price snapshot is incomplete")
 
 
 if __name__ == "__main__":

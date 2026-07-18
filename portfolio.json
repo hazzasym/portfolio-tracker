@@ -1,12 +1,17 @@
 {
   "meta": {
     "name": "My Investment Portfolio",
+    "version": "round-2",
+    "versionLabel": "Round 2",
+    "previousVersion": "round-1",
+    "previousVersionLabel": "Round 1",
+    "versionDate": "2026-07-12",
     "investmentDate": "2026-06-12",
     "baseCapitalTHB": 100000000,
     "buyExchangeRateUSDTHB": 32.9,
     "ozPerBahtWeight": 0.490147,
     "withholdingTax": { "US": 0.15, "TH": 0.10 },
-    "notes": "Edit this file to change the portfolio, then commit it. Buy prices are per-unit in THB as of the investment date. US holdings store the equivalent USD buy price too. Gold (99.99) is tracked via international gold spot (GC=F) converted to THB per baht-weight."
+    "notes": "Round 2 is effective 12 July 2026. Existing positions retain their 12 June cost basis; the 10% cash sleeve was moved to K-SF-A at the latest available business-day NAV (10 July 2026). Gold (99.99) is tracked via international gold spot (GC=F) converted to THB per baht-weight."
   },
   "holdings": [
     { "ticker": "NVDA",  "symbol": "NVDA",      "name": "NVIDIA",                 "class": "US Stock", "market": "US",   "targetWeight": 0.20, "units": 2962.6333425718121, "buyPriceTHB": 6750.751,  "buyValueTHB": 20000000, "divYield": 0.0014, "divFreq": "3M",            "theme": "Tech",         "reason": "7 นางฟ้า" },
@@ -18,7 +23,7 @@
     { "ticker": "ADVANC","symbol": "ADVANC.BK", "name": "Advanced Info Service",  "class": "Thai Stock","market": "TH",  "targetWeight": 0.05, "units": 13661.20218579235,  "buyPriceTHB": 366,       "buyValueTHB": 5000000,  "divYield": 0.0953, "divFreq": "",              "theme": "Telecom",      "reason": "" },
     { "ticker": "SCB",   "symbol": "SCB.BK",    "name": "SCB X",                  "class": "Thai Stock","market": "TH",  "targetWeight": 0.05, "units": 35714.285714285717, "buyPriceTHB": 140,       "buyValueTHB": 5000000,  "divYield": 0.0806, "divFreq": "6M",            "theme": "Finance",      "reason": "" },
     { "ticker": "GOLD",  "symbol": "GC=F",      "name": "Gold (99.99)",           "class": "Gold",     "market": "GOLD", "targetWeight": 0.15, "units": 221.10849056603774, "buyPriceTHB": 67840,     "buyValueTHB": 15000000, "divYield": null,   "divFreq": "-",             "theme": "-",            "reason": "Hedge / store of value" },
-    { "ticker": "CASH",  "symbol": "CASH",      "name": "Cash",                   "class": "Cash",     "market": "CASH", "targetWeight": 0.10, "units": 1,                  "buyPriceTHB": 10000000,  "buyValueTHB": 10000000, "divYield": null,   "divFreq": "-",             "theme": "-",            "reason": "Liquidity" }
+    { "ticker": "K-SF-A","symbol": "K-SF-A",   "name": "K Short Term Fixed Income Fund-A", "class": "Money Market", "market": "TH_FUND", "targetWeight": 0.10, "units": 833583.4083558401, "buyPriceTHB": 11.9964, "buyValueTHB": 10000000, "divYield": 0.0, "referenceYield": 0.011, "divFreq": "-", "theme": "Short-Term Fixed Income", "reason": "ย้าย Cash มา K-SF-A ตาม Round 2", "startsOn": "2026-07-12", "quoteSource": "https://www.kasikornasset.com/kasset/en/mutual-fund/fund-template/Pages/K-SF-A.aspx", "replaces": { "ticker": "CASH", "class": "Cash", "valueTHB": 10000000 } }
   ],
   "watchlist": [
     { "ticker": "SPCX", "symbol": "SPCX", "name": "SPCX",           "market": "US", "refPriceTHB": 5295.255,  "theme": "Tech",         "reason": "หุ้นซิ่ง" },

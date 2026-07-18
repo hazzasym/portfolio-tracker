@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-07-17T23:12:32.363758+00:00",
-  "date": "2026-07-17",
+  "updatedAt": "2026-07-18T07:00:42.370571+00:00",
+  "date": "2026-07-18",
   "usdthb": {
     "price": 33.57,
     "currency": "THB",
@@ -8,7 +8,7 @@
     "ok": true
   },
   "gold": {
-    "price": 4023.0,
+    "price": 4018.8,
     "currency": "USD",
     "previousClose": 3997.0,
     "ok": true,
@@ -104,6 +104,14 @@
       "currency": "USD",
       "previousClose": 693.86,
       "ok": true
+    },
+    "K-SF-A": {
+      "price": 11.9961,
+      "currency": "THB",
+      "previousClose": 11.9968,
+      "ok": true,
+      "asOf": "2026-07-17",
+      "source": "https://www.kasikornasset.com/kasset/en/mutual-fund/fund-template/Pages/K-SF-A.aspx"
     }
   },
   "dividends": {
@@ -609,5 +617,6 @@
       ],
       "ok": true
     }
-  }
+  },
+  "complete": true
 }

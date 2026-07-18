@@ -6,9 +6,12 @@ const fmtTHB = (n) =>
   "฿" + Number(n).toLocaleString("en-US", { maximumFractionDigits: 0 });
 const fmtTHB2 = (n) =>
   "฿" + Number(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const fmtTHB4 = (n) =>
+  "฿" + Number(n).toLocaleString("en-US", { minimumFractionDigits: 4, maximumFractionDigits: 4 });
 const fmtUSD2 = (n) =>
   "$" + Number(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const fmtPct = (n) => (n >= 0 ? "+" : "") + (n * 100).toFixed(2) + "%";
+const fmtSignedTHB = (n) => `${n >= 0 ? "+" : "-"}${fmtTHB(Math.abs(n))}`;
 const cls = (n) => (n > 0 ? "pos" : n < 0 ? "neg" : "muted");
 const sign = (n) => (n >= 0 ? "+" : "");
 
@@ -21,7 +24,7 @@ const AXIS = "#8b98a5", GRID = "#2c3845";
 // Stable, consistent colors across every chart.
 const CLASS_COLORS = {
   "US Stock": "#4dabf7", "US Fund": "#22b8cf", "Thai Stock": "#2fbf71",
-  "Gold": "#e3b341", "Cash": "#8b98a5",
+  "Gold": "#e3b341", "Cash": "#8b98a5", "Money Market": "#63e6be",
 };
 const COLOR = { ticker: {}, class: {}, theme: {} };
 function buildColors(portfolio) {
@@ -48,6 +51,29 @@ async function getJSON(path) {
   return res.json();
 }
 
+function holdingsAsOf(portfolio, asOfDate) {
+  return portfolio.holdings.flatMap((holding) => {
+    if (!holding.startsOn || asOfDate >= holding.startsOn) return [holding];
+    if (!holding.replaces) return [];
+    const predecessor = holding.replaces;
+    return [{
+      ticker: predecessor.ticker,
+      symbol: predecessor.ticker,
+      name: predecessor.name || predecessor.ticker,
+      class: predecessor.class || "Cash",
+      market: predecessor.market || "CASH",
+      targetWeight: holding.targetWeight,
+      units: 1,
+      buyPriceTHB: predecessor.valueTHB,
+      buyValueTHB: predecessor.valueTHB,
+      divYield: 0,
+      divFreq: "-",
+      theme: predecessor.theme || predecessor.class || "Cash",
+      reason: `Scheduled to move to ${holding.ticker} on ${holding.startsOn}`,
+    }];
+  });
+}
+
 function priceTHB(item, snap) {
   const rate = snap.usdthb && snap.usdthb.price;
   if (item.market === "CASH") return null;
@@ -59,7 +85,7 @@ function priceTHB(item, snap) {
   const q = snap.prices[item.symbol];
   if (!q || !q.ok) return null;
   if (item.market === "US") return rate ? q.price * rate : null;
-  if (item.market === "TH") return q.price;
+  if (item.market === "TH" || item.market === "TH_FUND") return q.price;
   return null;
 }
 
@@ -74,7 +100,7 @@ function prevTHB(item, snap) {
   if (!q || !q.ok) return null;
   const pc = q.previousClose || q.price;
   if (item.market === "US") return rate ? pc * rate : null;
-  if (item.market === "TH") return pc;
+  if (item.market === "TH" || item.market === "TH_FUND") return pc;
   return null;
 }
 
@@ -163,8 +189,9 @@ function daysSince(dateStr) {
   return Math.max(1, Math.round((Date.now() - new Date(dateStr).getTime()) / 86400000));
 }
 
-function renderCards(rows, snap, portfolio) {
+function renderCards(rows, snap, portfolio, snapshots) {
   const totalValue = rows.reduce((s, r) => s + r.value, 0);
+  const complete = rows.every((r) => r.market === "CASH" || r.valuedLive);
   const totalCost = portfolio.meta.baseCapitalTHB;
   const pl = totalValue - totalCost;
   const priceRet = pl / totalCost;
@@ -179,17 +206,36 @@ function renderCards(rows, snap, portfolio) {
   const days = daysSince(portfolio.meta.investmentDate);
 
   const cards = [
-    { label: "Current Value", value: fmtTHB(totalValue),
+    { label: complete ? "Current Value" : "Current Value (partial estimate)", value: fmtTHB(totalValue),
       delta: `<span class="${cls(priceRet)}">${sign(pl)}${fmtTHB(pl)} (${fmtPct(priceRet)})</span> vs cost` },
-    { label: `Total Return (${days}d)`, value: `<span class="${cls(totalRet)}">${fmtPct(totalRet)}</span>`,
-      delta: `Price ${fmtPct(priceRet)} + income ${fmtPct(incomeReceived / totalCost)} <span class="muted">(net)</span>` },
-    { label: "Day Change", value: `<span class="${cls(dayChange)}">${sign(dayChange)}${fmtTHB(dayChange)}</span>`,
-      delta: `<span class="${cls(dayPct)}">${fmtPct(dayPct)}</span> vs prev close` },
+    { label: `Total Return (${days}d)`, value: complete ? `<span class="${cls(totalRet)}">${fmtPct(totalRet)}</span>` : "—",
+      delta: complete ? `Price ${fmtPct(priceRet)} + income ${fmtPct(incomeReceived / totalCost)} <span class="muted">(net)</span>` : "Partial market data" },
+    { label: "Day Change", value: complete ? `<span class="${cls(dayChange)}">${sign(dayChange)}${fmtTHB(dayChange)}</span>` : "—",
+      delta: complete ? `<span class="${cls(dayPct)}">${fmtPct(dayPct)}</span> vs prev close` : "Partial market data" },
     { label: "Annual Dividends (net of tax)", value: fmtTHB(annualDivNet),
       delta: `Net yield ${(portYield * 100).toFixed(2)}% · gross ${fmtTHB(annualDivGross)}` },
     { label: "USD / THB", value: snap.usdthb && snap.usdthb.ok ? snap.usdthb.price.toFixed(2) : "—",
       delta: `Buy rate ${portfolio.meta.buyExchangeRateUSDTHB}` },
   ];
+  const baseline = (snapshots || [])
+    .slice()
+    .sort((a, b) => a.effectiveDate.localeCompare(b.effectiveDate))
+    .at(-1);
+  if (baseline) {
+    const externalFlow = baseline.externalFlowTHB || 0;
+    const periodPL = totalValue - baseline.totalValueTHB - externalFlow;
+    const periodRet = baseline.totalValueTHB ? periodPL / baseline.totalValueTHB : 0;
+    const periodDays = daysSince(baseline.effectiveDate);
+    cards.splice(2, 0, complete ? {
+      label: `Round 2 P/L (${periodDays}d)`,
+      value: `<span class="${cls(periodPL)}">${fmtSignedTHB(periodPL)}</span>`,
+      delta: `${fmtPct(periodRet)} since ${baseline.effectiveDate} · Round 1 locked ${fmtSignedTHB(baseline.priceGainLossTHB)} (${fmtPct(baseline.priceReturn)})`,
+    } : {
+      label: `Round 2 P/L (${periodDays}d)`,
+      value: "—",
+      delta: "Partial market data · locked Round 1 snapshot preserved",
+    });
+  }
   document.getElementById("cards").innerHTML = cards
     .map((c) => `<div class="card"><div class="label">${c.label}</div>
       <div class="value">${c.value}</div><div class="delta">${c.delta}</div></div>`)
@@ -207,6 +253,10 @@ function formatNativePrice(row, snap) {
   if (!q || !q.ok || q.price == null) return '<span class="muted">n/a</span>';
   if (row.market === "US") return `${fmtUSD2(q.price)} <span class="muted">USD</span>`;
   if (row.market === "TH") return `${fmtTHB2(q.price)} <span class="muted">THB</span>`;
+  if (row.market === "TH_FUND") {
+    const asOf = q.asOf ? ` <span class="muted">as of ${q.asOf}</span>` : "";
+    return `${fmtTHB4(q.price)} <span class="muted">THB NAV</span>${asOf}`;
+  }
   if (row.market === "GOLD") return `${fmtUSD2(q.price)} <span class="muted">/ oz</span>`;
   return '<span class="muted">n/a</span>';
 }
@@ -215,7 +265,8 @@ function formatTHBUnit(row) {
   if (row.market === "CASH") return '<span class="muted">—</span>';
   if (row.nowPrice == null) return '<span class="muted">n/a</span>';
   const unit = row.market === "GOLD" ? ' <span class="muted">/ baht wt.</span>' : "";
-  return `${fmtTHB2(row.nowPrice)}${unit}`;
+  const price = row.market === "TH_FUND" ? fmtTHB4(row.nowPrice) : fmtTHB2(row.nowPrice);
+  return `${price}${unit}`;
 }
 
 function renderLatestPrices(rows, snap) {
@@ -282,9 +333,10 @@ function renderHoldingsTable(rows) {
 
   document.querySelector("#holdingsTable tbody").innerHTML = sorted.map((r) => {
     const weight = totalValue ? r.value / totalValue : 0;
+    const priceFormatter = r.market === "TH_FUND" ? fmtTHB4 : fmtTHB2;
     const nowP = r.nowPrice == null
-      ? (r.market === "CASH" ? "—" : '<span class="muted">n/a</span>') : fmtTHB2(r.nowPrice);
-    const buyP = r.market === "CASH" ? "—" : fmtTHB2(r.buyPriceTHB);
+      ? (r.market === "CASH" ? "—" : '<span class="muted">n/a</span>') : priceFormatter(r.nowPrice);
+    const buyP = r.market === "CASH" ? "—" : priceFormatter(r.buyPriceTHB);
     return `<tr>
       <td class="ticker" data-label="Ticker">${r.ticker}</td>
       <td data-label="Name">${r.name}</td>
@@ -311,7 +363,7 @@ function policyWeights(portfolio) {
     if (h.market === "US") w.eq += t;
     else if (h.market === "TH") w.set += t;
     else if (h.market === "GOLD") w.gold += t;
-    else if (h.market === "CASH") w.cash += t;
+    else if (h.market === "CASH" || h.market === "TH_FUND") w.cash += t;
   });
   const sum = w.eq + w.set + w.gold + w.cash || 1;
   return { eq: w.eq / sum, set: w.set / sum, gold: w.gold / sum, cash: w.cash / sum };
@@ -701,7 +753,10 @@ function renderDividends(rows) {
     ? '<strong>*</strong> actual trailing yield differs from your estimate by &gt;0.5pp. Thai stocks can include large special dividends, inflating the trailing figure.'
     : "Your estimates match the actual trailing yields closely.";
   document.getElementById("divNote").innerHTML = base +
-    " Yields shown are gross; <em>Net Income</em> applies withholding tax (US 15%, Thai 10%).";
+    " Yields shown are gross; <em>Net Income</em> applies withholding tax (US 15%, Thai 10%)." +
+    rows.filter((r) => r.referenceYield != null)
+      .map((r) => ` <strong>${r.ticker}</strong> reference yield: ${(r.referenceYield * 100).toFixed(2)}% (not a dividend or distribution; tracked through NAV).`)
+      .join("");
 
   renderDivTrendChart(dv);
 }
@@ -773,7 +828,7 @@ function setupLookup(portfolio, snap, rows) {
         In portfolio: ${Number(r.units).toLocaleString("en-US", { maximumFractionDigits: 2 })} units &middot;
         buy ${fmtTHB2(r.buyPriceTHB)} &rarr; now ${r.nowPrice == null ? "n/a" : fmtTHB2(r.nowPrice)} &middot;
         return <span class="${cls(r.ret)}">${fmtPct(r.ret)}</span><br/>
-        Value ${fmtTHB(r.value)} &middot; theme: ${r.theme} &middot; div yield: ${r.divYield == null ? "-" : (r.divYield * 100).toFixed(2) + "%"}
+        Value ${fmtTHB(r.value)} &middot; theme: ${r.theme} &middot; ${r.referenceYield != null ? `reference yield: ${(r.referenceYield * 100).toFixed(2)}% (not a dividend or distribution)` : `div yield: ${r.divYield == null ? "-" : (r.divYield * 100).toFixed(2) + "%"}`}
         ${r.reason ? "<br/>Reason: " + r.reason : ""}</div>`;
     } else {
       const w = hit.w;
@@ -792,21 +847,37 @@ function setupLookup(portfolio, snap, rows) {
 
 async function main() {
   try {
-    const [portfolio, snap, history] = await Promise.all([
-      getJSON("portfolio.json"), getJSON("prices.json"), getJSON("history.json").catch(() => []),
+    const [portfolio, snap, history, snapshots] = await Promise.all([
+      getJSON("portfolio.json"),
+      getJSON("prices.json"),
+      getJSON("history.json").catch(() => []),
+      getJSON("portfolio_snapshots.json"),
     ]);
-    DATA = { portfolio, snap, history };
-    buildColors(portfolio);
-    const rows = computeHoldings(portfolio, snap);
-    const totalCost = portfolio.meta.baseCapitalTHB;
+    const versionIsActive = !portfolio.meta.versionDate || snap.date >= portfolio.meta.versionDate;
+    const activeSnapshots = snapshots.filter((snapshot) => snapshot.effectiveDate <= snap.date);
+    const activeMeta = versionIsActive ? portfolio.meta : {
+      ...portfolio.meta,
+      version: portfolio.meta.previousVersion || "previous",
+      versionLabel: portfolio.meta.previousVersionLabel || "Previous round",
+      versionDate: portfolio.meta.investmentDate,
+    };
+    const activePortfolio = {
+      ...portfolio,
+      meta: activeMeta,
+      holdings: holdingsAsOf(portfolio, snap.date),
+    };
+    DATA = { portfolio: activePortfolio, snap, history, snapshots: activeSnapshots };
+    buildColors(activePortfolio);
+    const rows = computeHoldings(activePortfolio, snap);
+    const totalCost = activePortfolio.meta.baseCapitalTHB;
 
     document.getElementById("subline").textContent =
-      `${portfolio.meta.name} · invested ${portfolio.meta.investmentDate} · prices as of ${snap.date}`;
+      `${activePortfolio.meta.name} · invested ${activePortfolio.meta.investmentDate} · ${activePortfolio.meta.versionLabel || activePortfolio.meta.version || "current"} since ${activePortfolio.meta.versionDate || activePortfolio.meta.investmentDate} · prices as of ${snap.date}`;
     document.getElementById("updatedAt").textContent =
       snap.updatedAt ? " Last update: " + new Date(snap.updatedAt).toLocaleString() : "";
     renderFreshness(snap);
 
-    renderCards(rows, snap, portfolio); // persistent KPI bar
+    renderCards(rows, snap, activePortfolio, activeSnapshots); // persistent KPI bar
     renderLatestPrices(rows, snap);
 
     const hist = history || [];
@@ -814,7 +885,7 @@ async function main() {
     // so hidden canvases never draw at zero width).
     const tabRenderers = {
       overview: () => {
-        if (hist.length) renderBenchChart(hist, portfolio);
+        if (hist.length) renderBenchChart(hist, activePortfolio);
         setupAllocToggle(rows);
         renderMovers(rows);
       },
@@ -827,13 +898,13 @@ async function main() {
       risk: () => {
         renderConcentration(rows);
         renderRiskMetrics(hist);
-        renderFXAttribution(rows, snap, portfolio);
+        renderFXAttribution(rows, snap, activePortfolio);
       },
       income: () => renderDividends(rows),
       holdings: () => {
         renderHoldingsTable(rows);
-        renderWatchlist(portfolio, snap);
-        setupLookup(portfolio, snap, rows);
+        renderWatchlist(activePortfolio, snap);
+        setupLookup(activePortfolio, snap, rows);
       },
     };
     setupTabs(tabRenderers);
@@ -849,7 +920,10 @@ function renderFreshness(snap) {
   const today = new Date().toISOString().slice(0, 10);
   const dataDate = snap.date;
   const days = Math.round((new Date(today) - new Date(dataDate)) / 86400000);
-  if (days <= 0) {
+  if (snap.complete === false) {
+    el.className = "badge stale";
+    el.textContent = days <= 0 ? "Partial data · updated today" : `Partial data · ${days}d old`;
+  } else if (days <= 0) {
     el.className = "badge fresh";
     el.textContent = "Live · updated today";
   } else {

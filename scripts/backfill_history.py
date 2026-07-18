@@ -15,6 +15,8 @@ import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
 
+from market_data import fetch_kasset_nav_history
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PORTFOLIO = os.path.join(ROOT, "portfolio.json")
 HISTORY = os.path.join(ROOT, "history.json")
@@ -60,10 +62,14 @@ def main():
     period2 = int(datetime.now(timezone.utc).timestamp()) + 86400
 
     us_th = [h for h in portfolio["holdings"] if h["market"] in ("US", "TH")]
+    th_funds = [h for h in portfolio["holdings"] if h["market"] == "TH_FUND"]
     series = {}
     for h in us_th:
         print(f"History {h['symbol']} ...")
         series[h["symbol"]] = hist_closes(h["symbol"], period1, period2)
+    for h in th_funds:
+        print(f"Official KAsset NAV history {h['symbol']} ...")
+        series[h["symbol"]] = fetch_kasset_nav_history(h["symbol"])
     print("History THB=X ...")
     fx = hist_closes("THB=X", period1, period2)
     print("History GC=F ...")
@@ -105,13 +111,20 @@ def main():
         by_class = {}
         for h in portfolio["holdings"]:
             mk, cls = h["market"], h.get("class", h["market"])
-            if mk == "CASH":
+            starts_on = h.get("startsOn")
+            replacement = h.get("replaces")
+            if starts_on and d < starts_on:
+                if not replacement:
+                    continue
+                cls = replacement.get("class", "Cash")
+                v = replacement["valueTHB"]
+            elif mk == "CASH":
                 v = h["buyValueTHB"]
             elif mk == "GOLD":
                 v = last_gold * oz_per_baht * last_fx * h["units"]
             elif mk == "US":
                 v = last[h["symbol"]] * last_fx * h["units"]
-            elif mk == "TH":
+            elif mk in ("TH", "TH_FUND"):
                 v = last[h["symbol"]] * h["units"]
             else:
                 v = h["buyValueTHB"]
@@ -122,6 +135,11 @@ def main():
         gold_thb = last_gold * oz_per_baht * last_fx
         points.append({
             "date": d,
+            "portfolioVersion": (
+                meta.get("version")
+                if d >= meta.get("versionDate", meta["investmentDate"])
+                else "round-1"
+            ),
             "totalValueTHB": round(total, 2),
             "usdthb": last_fx,
             "complete": True,

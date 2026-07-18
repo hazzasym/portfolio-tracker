@@ -1,0 +1,31 @@
+[
+  {
+    "id": "round-1-close",
+    "label": "Round 1 close / Round 2 baseline",
+    "effectiveDate": "2026-07-12",
+    "quoteTimestamp": "2026-07-12T23:13:05.459068+00:00",
+    "quoteSourceCommit": "4b5dfaa",
+    "costBasisTHB": 100000000,
+    "totalValueTHB": 102403172.8,
+    "priceGainLossTHB": 2403172.8,
+    "priceReturn": 0.024031728,
+    "externalFlowTHB": 0,
+    "byHolding": {
+      "NVDA": { "priceTHB": 7037.6256, "valueTHB": 20849904.26, "gainLossTHB": 849904.26, "return": 0.0424952128 },
+      "TSM": { "priceTHB": 14481.9096, "valueTHB": 10383309.11, "gainLossTHB": 383309.11, "return": 0.038330911 },
+      "BE": { "priceTHB": 8160.1896, "valueTHB": 9531553.26, "gainLossTHB": -468446.74, "return": -0.0468446736 },
+      "LLY": { "priceTHB": 39651.0288, "valueTHB": 5318616.26, "gainLossTHB": 318616.26, "return": 0.0637232513 },
+      "JNJ": { "priceTHB": 8572.8528, "valueTHB": 5408997.25, "gainLossTHB": 408997.25, "return": 0.0817994496 },
+      "VOO": { "priceTHB": 23147.1696, "valueTHB": 15475358.59, "gainLossTHB": 475358.59, "return": 0.0316905726 },
+      "ADVANC": { "priceTHB": 373, "valueTHB": 5095628.42, "gainLossTHB": 95628.42, "return": 0.0191256831 },
+      "SCB": { "priceTHB": 156.5, "valueTHB": 5589285.71, "gainLossTHB": 589285.71, "return": 0.1178571429 },
+      "GOLD": { "priceTHB": 66711.684863, "valueTHB": 14750519.94, "gainLossTHB": -249480.06, "return": -0.0166320038 },
+      "CASH": { "priceTHB": null, "valueTHB": 10000000, "gainLossTHB": 0, "return": 0 }
+    },
+    "change": {
+      "removed": { "ticker": "CASH", "valueTHB": 10000000 },
+      "added": { "ticker": "K-SF-A", "valueTHB": 10000000, "units": 833583.4083558401, "entryNAVTHB": 11.9964, "navAsOf": "2026-07-10" },
+      "note": "The effective date is 12 July 2026. Because it was a non-business day, K-SF-A uses the official 10 July NAV shown in the Round 2 PDF."
+    }
+  }
+]
