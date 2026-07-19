@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-07-18T23:14:38.579595+00:00",
-  "date": "2026-07-18",
+  "updatedAt": "2026-07-19T16:24:28.437398+00:00",
+  "date": "2026-07-19",
   "usdthb": {
     "price": 33.57,
     "currency": "THB",
@@ -10,7 +10,7 @@
   "gold": {
     "price": 4018.8,
     "currency": "USD",
-    "previousClose": 3997.0,
+    "previousClose": 4061.1,
     "ok": true,
     "ozPerBahtWeight": 0.490147
   },
