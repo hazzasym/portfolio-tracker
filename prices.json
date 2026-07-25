@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-07-24T23:29:54.804787+00:00",
-  "date": "2026-07-24",
+  "updatedAt": "2026-07-25T16:15:28.279333+00:00",
+  "date": "2026-07-25",
   "usdthb": {
     "price": 33.69,
     "currency": "THB",
@@ -8,7 +8,7 @@
     "ok": true
   },
   "gold": {
-    "price": 4055.7,
+    "price": 4070.8,
     "currency": "USD",
     "previousClose": 4010.3,
     "ok": true,
