@@ -1,123 +1,122 @@
 {
-  "updatedAt": "2026-08-16T22:42:33.486007+00:00",
-  "date": "2026-08-16",
+  "updatedAt": "2026-08-17T15:45:26.898741+00:00",
+  "date": "2026-08-17",
   "usdthb": {
-    "price": 33.09,
+    "price": 33.0,
     "currency": "THB",
     "previousClose": 32.98,
     "ok": true
   },
   "gold": {
-    "price": 4432.7,
+    "price": 4479.6,
     "currency": "USD",
-    "previousClose": 4383.0,
+    "previousClose": 4408.9,
     "ok": true,
     "ozPerBahtWeight": 0.490147
   },
   "prices": {
     "ADVANC.BK": {
-      "price": 371.0,
+      "price": 372.0,
       "currency": "THB",
-      "previousClose": 371.0,
+      "previousClose": 374.0,
       "ok": true
     },
     "BE": {
-      "price": 229.94,
+      "price": 235.97,
       "currency": "USD",
-      "previousClose": 219.34,
+      "previousClose": 210.63,
       "ok": true
     },
     "CRWV": {
-      "price": 105.26,
+      "price": 106.968,
       "currency": "USD",
-      "previousClose": 90.67,
+      "previousClose": 88.19,
       "ok": true
     },
     "GEV": {
-      "price": 1063.25,
+      "price": 1082.76,
       "currency": "USD",
-      "previousClose": 990.32,
+      "previousClose": 990.85,
       "ok": true
     },
     "GOOG": {
-      "price": 343.54,
+      "price": 341.428,
       "currency": "USD",
-      "previousClose": 353.47,
+      "previousClose": 355.84,
       "ok": true
     },
     "JNJ": {
-      "price": 260.35,
+      "price": 263.68,
       "currency": "USD",
-      "previousClose": 259.24,
+      "previousClose": 261.81,
       "ok": true
     },
     "LLY": {
-      "price": 1180.16,
+      "price": 1197.53,
       "currency": "USD",
-      "previousClose": 1185.71,
+      "previousClose": 1231.94,
       "ok": true
     },
     "NVDA": {
-      "price": 225.16,
+      "price": 227.325,
       "currency": "USD",
-      "previousClose": 223.96,
+      "previousClose": 217.55,
       "ok": true
     },
     "PLTR": {
-      "price": 174.04,
+      "price": 176.1,
       "currency": "USD",
-      "previousClose": 172.01,
+      "previousClose": 175.23,
       "ok": true
     },
     "RSP": {
-      "price": 222.77,
+      "price": 221.25,
       "currency": "USD",
-      "previousClose": 220.09,
+      "previousClose": 220.22,
       "ok": true
     },
     "SCB.BK": {
-      "price": 151.0,
+      "price": 152.0,
       "currency": "THB",
       "previousClose": 152.0,
       "ok": true
     },
     "SPCX": {
-      "price": 140.0,
+      "price": 148.78,
       "currency": "USD",
-      "previousClose": 133.11,
+      "previousClose": 138.74,
       "ok": true
     },
     "SPY": {
-      "price": 776.34,
+      "price": 775.07,
       "currency": "USD",
-      "previousClose": 773.26,
+      "previousClose": 773.03,
       "ok": true
     },
     "TSM": {
-      "price": 426.35,
+      "price": 433.32,
       "currency": "USD",
-      "previousClose": 420.04,
+      "previousClose": 418.47,
       "ok": true
     },
     "VOO": {
-      "price": 713.61,
+      "price": 712.43,
       "currency": "USD",
-      "previousClose": 710.71,
+      "previousClose": 710.65,
       "ok": true
     },
     "K-SF-A": {
-      "price": 12.0016,
+      "price": 12.0018,
       "currency": "THB",
-      "previousClose": 12.0014,
+      "previousClose": 12.0016,
       "ok": true,
-      "asOf": "2026-08-14",
+      "asOf": "2026-08-17",
       "source": "https://www.kasikornasset.com/kasset/en/mutual-fund/fund-template/Pages/K-SF-A.aspx"
     }
   },
   "dividends": {
     "ADVANC.BK": {
       "byYear": {
-        "2021": 3.45,
         "2022": 7.69,
         "2023": 8.24,
         "2024": 9.48,
@@ -125,7 +124,7 @@
         "2026": 27.41
       },
       "ttm": 34.3,
-      "count": 10,
+      "count": 9,
       "payouts": [
         [
           "2024-08-19",
