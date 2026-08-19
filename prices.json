@@ -1,116 +1,116 @@
 {
-  "updatedAt": "2026-08-18T22:45:30.226852+00:00",
-  "date": "2026-08-18",
+  "updatedAt": "2026-08-19T15:52:52.252614+00:00",
+  "date": "2026-08-19",
   "usdthb": {
-    "price": 33.09,
+    "price": 32.86,
     "currency": "THB",
-    "previousClose": 33.12,
+    "previousClose": 33.08,
     "ok": true
   },
   "gold": {
-    "price": 4389.6,
+    "price": 4546.3,
     "currency": "USD",
-    "previousClose": 4363.6,
+    "previousClose": 4380.4,
     "ok": true,
     "ozPerBahtWeight": 0.490147
   },
   "prices": {
     "ADVANC.BK": {
-      "price": 372.0,
+      "price": 362.0,
       "currency": "THB",
-      "previousClose": 374.0,
+      "previousClose": 370.0,
       "ok": true
     },
     "BE": {
-      "price": 209.01,
+      "price": 203.515,
       "currency": "USD",
-      "previousClose": 211.21,
+      "previousClose": 237.16,
       "ok": true
     },
     "CRWV": {
-      "price": 93.17,
+      "price": 93.65,
       "currency": "USD",
-      "previousClose": 90.32,
+      "previousClose": 107.73,
       "ok": true
     },
     "GEV": {
-      "price": 1004.53,
+      "price": 983.787,
       "currency": "USD",
-      "previousClose": 1011.88,
+      "previousClose": 1039.9,
       "ok": true
     },
     "GOOG": {
-      "price": 341.28,
+      "price": 342.25,
       "currency": "USD",
-      "previousClose": 343.0,
+      "previousClose": 342.37,
       "ok": true
     },
     "JNJ": {
-      "price": 271.11,
+      "price": 272.9,
       "currency": "USD",
-      "previousClose": 259.8,
+      "previousClose": 260.86,
       "ok": true
     },
     "LLY": {
-      "price": 1225.73,
+      "price": 1265.13,
       "currency": "USD",
-      "previousClose": 1215.02,
+      "previousClose": 1220.28,
       "ok": true
     },
     "NVDA": {
-      "price": 219.74,
+      "price": 218.85,
       "currency": "USD",
-      "previousClose": 217.5,
+      "previousClose": 224.09,
       "ok": true
     },
     "PLTR": {
-      "price": 171.54,
+      "price": 175.58,
       "currency": "USD",
-      "previousClose": 174.94,
+      "previousClose": 171.04,
       "ok": true
     },
     "RSP": {
-      "price": 219.79,
+      "price": 222.42,
       "currency": "USD",
-      "previousClose": 220.69,
+      "previousClose": 221.08,
       "ok": true
     },
     "SCB.BK": {
-      "price": 151.5,
+      "price": 151.0,
       "currency": "THB",
-      "previousClose": 152.0,
+      "previousClose": 152.5,
       "ok": true
     },
     "SPCX": {
-      "price": 143.34,
+      "price": 139.57,
       "currency": "USD",
-      "previousClose": 133.29,
+      "previousClose": 146.15,
       "ok": true
     },
     "SPY": {
-      "price": 767.45,
+      "price": 770.34,
       "currency": "USD",
-      "previousClose": 770.56,
+      "previousClose": 772.49,
       "ok": true
     },
     "TSM": {
-      "price": 413.41,
+      "price": 412.05,
       "currency": "USD",
-      "previousClose": 422.06,
+      "previousClose": 429.15,
       "ok": true
     },
     "VOO": {
-      "price": 705.4,
+      "price": 708.145,
       "currency": "USD",
-      "previousClose": 708.42,
+      "previousClose": 710.17,
       "ok": true
     },
     "K-SF-A": {
-      "price": 12.0015,
+      "price": 12.002,
       "currency": "THB",
-      "previousClose": 12.0018,
+      "previousClose": 12.0015,
       "ok": true,
-      "asOf": "2026-08-18",
+      "asOf": "2026-08-19",
       "source": "https://www.kasikornasset.com/kasset/en/mutual-fund/fund-template/Pages/K-SF-A.aspx"
     }
   },
@@ -121,15 +121,11 @@
         "2023": 8.24,
         "2024": 9.48,
         "2025": 12.63,
-        "2026": 27.41
+        "2026": 36.1
       },
-      "ttm": 34.3,
-      "count": 9,
+      "ttm": 36.1,
+      "count": 10,
       "payouts": [
-        [
-          "2024-08-19",
-          4.87
-        ],
         [
           "2025-02-20",
           5.74
@@ -141,6 +137,10 @@
         [
           "2026-02-27",
           27.41
+        ],
+        [
+          "2026-08-19",
+          8.69
         ]
       ],
       "ok": true
