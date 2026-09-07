@@ -1,8 +1,8 @@
 {
-  "updatedAt": "2026-09-07T00:04:42.042012+00:00",
+  "updatedAt": "2026-09-07T19:15:52.835466+00:00",
   "date": "2026-09-07",
   "usdthb": {
-    "price": 32.9,
+    "price": 32.84,
     "currency": "THB",
     "previousClose": 33.125,
     "ok": true
@@ -16,9 +16,9 @@
   },
   "prices": {
     "ADVANC.BK": {
-      "price": 346.0,
+      "price": 357.0,
       "currency": "THB",
-      "previousClose": 355.0,
+      "previousClose": 354.0,
       "ok": true
     },
     "BE": {
@@ -76,9 +76,9 @@
       "ok": true
     },
     "SCB.BK": {
-      "price": 151.5,
+      "price": 152.0,
       "currency": "THB",
-      "previousClose": 151.0,
+      "previousClose": 152.0,
       "ok": true
     },
     "SPCX": {
@@ -106,11 +106,11 @@
       "ok": true
     },
     "K-SF-A": {
-      "price": 12.006,
+      "price": 12.0068,
       "currency": "THB",
-      "previousClose": 12.0055,
+      "previousClose": 12.006,
       "ok": true,
-      "asOf": "2026-09-04",
+      "asOf": "2026-09-07",
       "source": "https://www.kasikornasset.com/kasset/en/mutual-fund/fund-template/Pages/K-SF-A.aspx"
     }
   },
