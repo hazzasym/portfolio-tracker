@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-09-27T00:43:20.310468+00:00",
+  "updatedAt": "2026-09-27T19:05:33.316480+00:00",
   "date": "2026-09-27",
   "usdthb": {
     "price": 33.37,
@@ -10,7 +10,7 @@
   "gold": {
     "price": 4321.2,
     "currency": "USD",
-    "previousClose": 4383.9,
+    "previousClose": 4376.4,
     "ok": true,
     "ozPerBahtWeight": 0.490147
   },
@@ -581,10 +581,6 @@
       "ttm": 7.345,
       "count": 20,
       "payouts": [
-        [
-          "2024-09-27",
-          1.639
-        ],
         [
           "2024-12-23",
           1.739
