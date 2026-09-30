@@ -1,14 +1,14 @@
 {
-  "updatedAt": "2026-09-29T20:03:12.071006+00:00",
-  "date": "2026-09-29",
+  "updatedAt": "2026-09-30T01:21:05.717351+00:00",
+  "date": "2026-09-30",
   "usdthb": {
-    "price": 33.56,
+    "price": 33.52,
     "currency": "THB",
-    "previousClose": 33.12,
+    "previousClose": 33.429,
     "ok": true
   },
   "gold": {
-    "price": 4203.0,
+    "price": 4204.4,
     "currency": "USD",
     "previousClose": 4298.0,
     "ok": true,
@@ -22,7 +22,7 @@
       "ok": true
     },
     "BE": {
-      "price": 291.28,
+      "price": 291.25,
       "currency": "USD",
       "previousClose": 276.53,
       "ok": true
@@ -34,7 +34,7 @@
       "ok": true
     },
     "GEV": {
-      "price": 962.715,
+      "price": 962.49,
       "currency": "USD",
       "previousClose": 950.28,
       "ok": true
@@ -46,13 +46,13 @@
       "ok": true
     },
     "JNJ": {
-      "price": 267.65,
+      "price": 267.57,
       "currency": "USD",
       "previousClose": 269.19,
       "ok": true
     },
     "LLY": {
-      "price": 1185.765,
+      "price": 1184.63,
       "currency": "USD",
       "previousClose": 1170.14,
       "ok": true
@@ -70,7 +70,7 @@
       "ok": true
     },
     "RSP": {
-      "price": 209.51,
+      "price": 209.5,
       "currency": "USD",
       "previousClose": 212.8,
       "ok": true
@@ -88,19 +88,19 @@
       "ok": true
     },
     "SPY": {
-      "price": 764.3,
+      "price": 764.2,
       "currency": "USD",
       "previousClose": 773.38,
       "ok": true
     },
     "TSM": {
-      "price": 457.005,
+      "price": 456.94,
       "currency": "USD",
       "previousClose": 452.0,
       "ok": true
     },
     "VOO": {
-      "price": 702.49,
+      "price": 702.46,
       "currency": "USD",
       "previousClose": 712.78,
       "ok": true
