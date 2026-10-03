@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-03T01:14:57.002788+00:00",
+  "updatedAt": "2026-10-03T18:44:00.315280+00:00",
   "date": "2026-10-03",
   "usdthb": {
     "price": 33.53,
@@ -8,7 +8,7 @@
     "ok": true
   },
   "gold": {
-    "price": 4172.1,
+    "price": 4162.3,
     "currency": "USD",
     "previousClose": 4168.4,
     "ok": true,
