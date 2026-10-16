@@ -1,14 +1,14 @@
 {
-  "updatedAt": "2026-10-16T00:30:10.843321+00:00",
+  "updatedAt": "2026-10-16T18:51:22.967803+00:00",
   "date": "2026-10-16",
   "usdthb": {
-    "price": 33.49,
+    "price": 33.42,
     "currency": "THB",
     "previousClose": 33.53,
     "ok": true
   },
   "gold": {
-    "price": 4176.6,
+    "price": 4179.8,
     "currency": "USD",
     "previousClose": 4190.6,
     "ok": true,
@@ -22,57 +22,57 @@
       "ok": true
     },
     "BE": {
-      "price": 236.3,
+      "price": 221.62,
       "currency": "USD",
-      "previousClose": 272.82,
+      "previousClose": 280.5,
       "ok": true
     },
     "CRWV": {
-      "price": 69.69,
+      "price": 60.453,
       "currency": "USD",
-      "previousClose": 81.58,
+      "previousClose": 82.08,
       "ok": true
     },
     "GEV": {
-      "price": 926.44,
+      "price": 924.565,
       "currency": "USD",
-      "previousClose": 999.35,
+      "previousClose": 1004.73,
       "ok": true
     },
     "GOOG": {
-      "price": 344.91,
+      "price": 336.445,
       "currency": "USD",
-      "previousClose": 344.86,
+      "previousClose": 347.86,
       "ok": true
     },
     "JNJ": {
-      "price": 253.28,
+      "price": 255.43,
       "currency": "USD",
-      "previousClose": 256.48,
+      "previousClose": 261.44,
       "ok": true
     },
     "LLY": {
-      "price": 1251.61,
+      "price": 1251.317,
       "currency": "USD",
-      "previousClose": 1169.6,
+      "previousClose": 1179.27,
       "ok": true
     },
     "NVDA": {
-      "price": 217.23,
+      "price": 213.93,
       "currency": "USD",
-      "previousClose": 230.48,
+      "previousClose": 229.28,
       "ok": true
     },
     "PLTR": {
-      "price": 200.5,
+      "price": 185.895,
       "currency": "USD",
-      "previousClose": 198.78,
+      "previousClose": 209.05,
       "ok": true
     },
     "RSP": {
-      "price": 215.0,
+      "price": 213.56,
       "currency": "USD",
-      "previousClose": 211.87,
+      "previousClose": 213.04,
       "ok": true
     },
     "SCB.BK": {
@@ -82,27 +82,27 @@
       "ok": true
     },
     "SPCX": {
-      "price": 148.62,
+      "price": 143.71,
       "currency": "USD",
-      "previousClose": 160.57,
+      "previousClose": 162.57,
       "ok": true
     },
     "SPY": {
-      "price": 771.79,
+      "price": 761.86,
       "currency": "USD",
-      "previousClose": 773.93,
+      "previousClose": 778.57,
       "ok": true
     },
     "TSM": {
-      "price": 422.25,
+      "price": 411.2,
       "currency": "USD",
-      "previousClose": 457.99,
+      "previousClose": 453.31,
       "ok": true
     },
     "VOO": {
-      "price": 709.43,
+      "price": 700.3,
       "currency": "USD",
-      "previousClose": 711.28,
+      "previousClose": 715.59,
       "ok": true
     },
     "K-SF-A": {
