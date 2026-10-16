@@ -2371,5 +2371,24 @@
       "goldTHB": 68645.13636470001,
       "setTHB": 1573.01
     }
+  },
+  {
+    "date": "2026-10-16",
+    "portfolioVersion": "round-2",
+    "totalValueTHB": 102764908.86,
+    "usdthb": 33.49,
+    "complete": true,
+    "byClass": {
+      "US Stock": 51910249.51,
+      "US Fund": 15884279.66,
+      "Thai Stock": 9794984.39,
+      "Gold": 15158973.73,
+      "Money Market": 10016421.59
+    },
+    "benchmarks": {
+      "sp500THB": 23758.810699999998,
+      "goldTHB": 68558.985187098,
+      "setTHB": 1573.01
+    }
   }
 ]
